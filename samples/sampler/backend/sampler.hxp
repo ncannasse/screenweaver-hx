@@ -1,0 +1,10 @@
+﻿<haxe selected="0">
+  <output name="Sampler" mode="neko" out="../bin/app.n" class="Sampler" lib="" cmd="" main="True" debug="False">-lib swhx</output>
+  <files path="/">
+    <file path="Command.hx" />
+    <file path="Preferences.hx" />
+    <file path="Sample.hx" />
+    <file path="Sampler.hx" />
+    <file path="Types.hx" />
+  </files>
+</haxe>

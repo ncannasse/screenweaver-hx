@@ -1,0 +1,104 @@
+KNOWN ISSUES:
+	Flash doesn't handle CTRL key down - bug in FP windowless mode,
+	use systools.Misc.getKeyState to work around.
+	
+	Flash doesn't handle Scroll-wheel events on Mac.
+	
+	Launching applications from terminal on OSX, using $neko xxx.n
+	results in crippled UI behavior. Run from the boot loader for
+	production.	
+	
+	Using Adobe Flash player 9, the player's settings dialog doesn't
+	allow changing values on the 'privacy' tab. (Win)
+
+TODO:
+	After using window.maximize, the system menu doesn't track maximized /
+	restore state correctly (Win)	
+	
+FEATURE IDEAS:	
+	allow to render a neko string buffer on the window
+	pop-up menu support	
+	
+2006-11-5 : 1.0.5
+	added swhx.Application.init minimal version argument
+	added swhx.Flash.onSourceLoaded event 
+	added swroot and swindex value options to boot-loader list.pinfo (Mac)
+	fixed LoadVariables error on using relative paths
+	fixed UI freeze with Adobe Flash player 8
+	removed worker-threads: Neko/haXe is now multithreaded
+	fixed get url 'post' malfunction 
+	fixed window-size issue on restore (Win)
+	implemented rudimentary transparent windowing
+	detect ctrl-click, and treat as right-click (Mac)
+
+2006-10-09 : 1.0.5 (Test Release)
+	fixed Windows not being able to be closed from Flash.
+	fixed boot loader icon not showing in window caption bar (Win)
+	added Window.maximize property, for code driven maximize/restore
+	added Window.minimize property, for code driven minimize/restore
+	added Window.drag() for code driven Window dragging
+	added Window.resize(direction) for code driven Window resizing
+	added 'plain' window style: 1 pixel black border, no caption
+	implemented worker thread support
+	progress dialogs should now be feasible using worker thread
+	fixed OSX 10.3.9 issues
+
+2006-09-28 : 1.0.4
+	fixed Sample preferences loading bug
+	fixed window.title bug
+	
+2006-09-28 : 1.0.3	
+	added 'title' property on window
+	fixed mouse wheel locality (win)
+	added Sampler application
+
+2006-09-21: 1.0.2	
+	fixed UTF8 issues
+	
+2006-09-21: 1.0.1
+	fixed right-click always being propegated (win)
+	fixed returning top-most from fullscreen (win)
+	fixed various bugs with the Flash AS3 API, haXe -> Flash
+	re-vamped SWHX icon for boot-loader (thanks Robert!)
+	drop-files removes 'file://localhost' from results (mac)
+	boot-loader command line args. now passed to NekoVM (thanks Asger!)
+	boot-loader '-swindex [pathToIndex.n]' switch
+	boot-loader '-swroot [pathToFolder]' switch
+
+2006-08-31: 1.0.0
+	all tidied up and ready to go
+		
+2006-08-28: 0.9.0 Beta (via haXelib)
+	now flash player 9 compatible
+	flash player search in OS browser folders (v.8 or 9)
+	fixed rescaling SWF on window resizing
+	implemented window.onMaximize event 
+	implemented window.onMinimize event
+	implemented Window.onRightClick event	
+	implemented window.top property
+	implemented window.lef property
+	implemented window.resizable property
+	implemented window.fullscreen property
+	implemented window.droptarget property
+	implemented window.onFilesDropped event
+	fixed window resize event propagation
+	fixed mousewheel event propagation
+	fixed focus and drawing issues
+	added Flash API (for haXe <-> Flash IDE/MTASC build SWFs io)
+	async streams between Neko and Flash
+	fixed frame-pulse loss on MessageBox
+	swhx.message moved to external library 'systools'
+	swhx.confirm moved to external library 'systools'
+	swhx.getKeyState moved to external library 'systools'	 
+
+2006-06-26: Beta2
+	fixed bug in string unescape.
+	handle FSCommand separately
+	allowed window resizing (manual and automatic)
+	can enable/disable window resize icons
+	updated for haXe 1.03
+
+2006-06-08: Beta
+	working on windows
+	some window events + getURL handling
+	flash/neko remoting communications

@@ -1,0 +1,5 @@
+//
+// Prefix header for all source files of the 'boot' target in the 'boot' project.
+//
+
+#include <Carbon/Carbon.h>

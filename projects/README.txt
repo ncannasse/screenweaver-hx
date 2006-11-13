@@ -1,0 +1,1 @@
+This folder contains temporary files as well as projects files needed to build SWHX on the different platforms.

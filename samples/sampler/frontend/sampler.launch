@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="com.adobe.flexbuilder.debug.launchConfigurationType.flash">
+<stringAttribute key="com.adobe.flexbuilder.debug.ATTR_APPLICATION" value="sampler.mxml"/>
+<stringAttribute key="com.adobe.flexbuilder.debug.ATTR_RUN_URL" value=""/>
+<stringAttribute key="com.adobe.flexbuilder.debug.ATTR_DEBUG_URL" value=""/>
+<stringAttribute key="com.adobe.flexbuilder.debug.ATTR_PROJECT" value="frontend"/>
+<booleanAttribute key="com.adobe.flexbuilder.debug.ATTR_USE_DEFAULT_URLS" value="true"/>
+</launchConfiguration>

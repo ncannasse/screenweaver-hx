@@ -1,0 +1,6 @@
+<project name="swhx" url="http://haxe.org/swhx" license="LGPL">
+    <user name="swhx"/>
+    <description>Screenweaver haXe enables the creation of Flash interfaced desktop applications using haXe</description>
+    <version name="1.0.5.4">Sync Streaming (win)</version>	
+	<depends name="systools"/>
+</project>

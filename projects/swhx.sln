@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swhx", "swhx.vcproj", "{8BF508AE-6E30-43D7-B2E2-0F40EC6D4509}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boot", "boot.vcproj", "{14840CDD-AD0C-4643-8194-7BD6B38D5150}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{8BF508AE-6E30-43D7-B2E2-0F40EC6D4509}.Debug.ActiveCfg = Debug|Win32
+		{8BF508AE-6E30-43D7-B2E2-0F40EC6D4509}.Debug.Build.0 = Debug|Win32
+		{8BF508AE-6E30-43D7-B2E2-0F40EC6D4509}.Release.ActiveCfg = Release|Win32
+		{8BF508AE-6E30-43D7-B2E2-0F40EC6D4509}.Release.Build.0 = Release|Win32
+		{14840CDD-AD0C-4643-8194-7BD6B38D5150}.Debug.ActiveCfg = Debug|Win32
+		{14840CDD-AD0C-4643-8194-7BD6B38D5150}.Debug.Build.0 = Debug|Win32
+		{14840CDD-AD0C-4643-8194-7BD6B38D5150}.Release.ActiveCfg = Release|Win32
+		{14840CDD-AD0C-4643-8194-7BD6B38D5150}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

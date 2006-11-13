@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Sample title="AS2 API" description="README.html">
+	<Build>
+		<MTASC>-cp ../../api/actionscript/AS2 -main -version 8 -swf uiAssets.swf -out ui.swf Gui</MTASC>
+		<Haxe>compile.hxml</Haxe>
+	</Build>
+	<Run>
+		<Boot/>
+	</Run>
+</Sample>

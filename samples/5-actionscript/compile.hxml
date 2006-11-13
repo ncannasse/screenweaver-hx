@@ -1,0 +1,5 @@
+-main App
+-neko app.n
+-lib swhx
+
+-cmd mtasc -header 400:300:20 -swf ui.swf Test.as
