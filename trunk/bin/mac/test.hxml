@@ -1,0 +1,11 @@
+# ui
+-neko app.n
+-main App
+-cp ../../api/haxe
+
+--next
+# app
+-swf ui.swf
+-main Flash
+-cp ../../api/haxe
+

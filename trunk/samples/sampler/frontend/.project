@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>frontend</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.adobe.flexbuilder.project.flexbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.adobe.flexbuilder.project.flexnature</nature>
+		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>bin</name>
+			<type>2</type>
+			<location>P:/swhx/samples/sampler/bin</location>
+		</link>
+		<link>
+			<name>[source path] AS3</name>
+			<type>2</type>
+			<location>../../../api/actionscript/AS3</location>
+		</link>
+	</linkedResources>
+</projectDescription>

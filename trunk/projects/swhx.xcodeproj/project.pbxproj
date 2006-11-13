@@ -1,0 +1,303 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D2AAC0B105546B7500DB518D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08FB77AAFE841565C02AAC07 /* Carbon.framework */; };
+		E802138E0AFA0DEA00ED3CF1 /* libneko.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E87F1C240A64FF62008D3314 /* libneko.dylib */; };
+		E82DCD020AA2D7A900ACDBBE /* swhx.ndll in CopyFiles */ = {isa = PBXBuildFile; fileRef = D2AAC09D05546B4700DB518D /* swhx.ndll */; };
+		E8D12BE20AE422B1009C1BDA /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8D12BE10AE422B1009C1BDA /* QuickTime.framework */; };
+		E8FE5A3B0A5E00A6002A9020 /* api.c in Sources */ = {isa = PBXBuildFile; fileRef = E8FE5A320A5E00A6002A9020 /* api.c */; };
+		E8FE5A3C0A5E00A6002A9020 /* flash_dll.c in Sources */ = {isa = PBXBuildFile; fileRef = E8FE5A330A5E00A6002A9020 /* flash_dll.c */; };
+		E8FE5A3D0A5E00A6002A9020 /* flash_dll.h in Headers */ = {isa = PBXBuildFile; fileRef = E8FE5A340A5E00A6002A9020 /* flash_dll.h */; };
+		E8FE5A3E0A5E00A6002A9020 /* flash.c in Sources */ = {isa = PBXBuildFile; fileRef = E8FE5A350A5E00A6002A9020 /* flash.c */; };
+		E8FE5A3F0A5E00A6002A9020 /* flash.h in Headers */ = {isa = PBXBuildFile; fileRef = E8FE5A360A5E00A6002A9020 /* flash.h */; };
+		E8FE5A400A5E00A6002A9020 /* np_host.c in Sources */ = {isa = PBXBuildFile; fileRef = E8FE5A370A5E00A6002A9020 /* np_host.c */; };
+		E8FE5A430A5E00A6002A9020 /* system.h in Headers */ = {isa = PBXBuildFile; fileRef = E8FE5A3A0A5E00A6002A9020 /* system.h */; };
+		E8FE5A450A5E00B7002A9020 /* system.c in Sources */ = {isa = PBXBuildFile; fileRef = E8FE5A440A5E00B7002A9020 /* system.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E82DCD000AA2D79700ACDBBE /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/local/lib;
+			dstSubfolderSpec = 0;
+			files = (
+				E82DCD020AA2D7A900ACDBBE /* swhx.ndll in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		08FB77AAFE841565C02AAC07 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		32BAE0B70371A74B00C91783 /* swhx_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swhx_Prefix.pch; sourceTree = "<group>"; };
+		D2AAC09D05546B4700DB518D /* swhx.ndll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = swhx.ndll; sourceTree = BUILT_PRODUCTS_DIR; };
+		E87F1C240A64FF62008D3314 /* libneko.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libneko.dylib; path = /usr/local/lib/libneko.dylib; sourceTree = "<absolute>"; };
+		E8D12BE10AE422B1009C1BDA /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
+		E8FE5A320A5E00A6002A9020 /* api.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = api.c; path = ../src/api.c; sourceTree = SOURCE_ROOT; };
+		E8FE5A330A5E00A6002A9020 /* flash_dll.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = flash_dll.c; path = ../src/flash_dll.c; sourceTree = SOURCE_ROOT; };
+		E8FE5A340A5E00A6002A9020 /* flash_dll.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = flash_dll.h; path = ../src/flash_dll.h; sourceTree = SOURCE_ROOT; };
+		E8FE5A350A5E00A6002A9020 /* flash.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = flash.c; path = ../src/flash.c; sourceTree = SOURCE_ROOT; };
+		E8FE5A360A5E00A6002A9020 /* flash.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = flash.h; path = ../src/flash.h; sourceTree = SOURCE_ROOT; };
+		E8FE5A370A5E00A6002A9020 /* np_host.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = np_host.c; path = ../src/np_host.c; sourceTree = SOURCE_ROOT; };
+		E8FE5A3A0A5E00A6002A9020 /* system.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = system.h; path = ../src/system.h; sourceTree = SOURCE_ROOT; };
+		E8FE5A440A5E00B7002A9020 /* system.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = system.c; path = ../src/mac/system.c; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D2AAC09B05546B4700DB518D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2AAC0B105546B7500DB518D /* Carbon.framework in Frameworks */,
+				E802138E0AFA0DEA00ED3CF1 /* libneko.dylib in Frameworks */,
+				E8D12BE20AE422B1009C1BDA /* QuickTime.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DDFF38A45A11DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC09D05546B4700DB518D /* swhx.ndll */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* swhx */ = {
+			isa = PBXGroup;
+			children = (
+				E8FE5A440A5E00B7002A9020 /* system.c */,
+				E8FE5A320A5E00A6002A9020 /* api.c */,
+				E8FE5A330A5E00A6002A9020 /* flash_dll.c */,
+				E8FE5A340A5E00A6002A9020 /* flash_dll.h */,
+				E8FE5A350A5E00A6002A9020 /* flash.c */,
+				E8FE5A360A5E00A6002A9020 /* flash.h */,
+				E8FE5A370A5E00A6002A9020 /* np_host.c */,
+				E8FE5A3A0A5E00A6002A9020 /* system.h */,
+				08FB77ACFE841707C02AAC07 /* Source */,
+				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				034768DDFF38A45A11DB9C8B /* Products */,
+			);
+			name = swhx;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				E8D12BE10AE422B1009C1BDA /* QuickTime.framework */,
+				E87F1C240A64FF62008D3314 /* libneko.dylib */,
+				08FB77AAFE841565C02AAC07 /* Carbon.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		08FB77ACFE841707C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				32BAE0B70371A74B00C91783 /* swhx_Prefix.pch */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC09905546B4700DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8FE5A3D0A5E00A6002A9020 /* flash_dll.h in Headers */,
+				E8FE5A3F0A5E00A6002A9020 /* flash.h in Headers */,
+				E8FE5A430A5E00A6002A9020 /* system.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC09C05546B4700DB518D /* swhx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "swhx" */;
+			buildPhases = (
+				D2AAC09905546B4700DB518D /* Headers */,
+				D2AAC09B05546B4700DB518D /* Frameworks */,
+				D2AAC09A05546B4700DB518D /* Sources */,
+				E82DCD000AA2D79700ACDBBE /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = swhx;
+			productName = swhx;
+			productReference = D2AAC09D05546B4700DB518D /* swhx.ndll */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB916408733D950010E9CD /* Build configuration list for PBXProject "swhx" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 0867D691FE84028FC02AAC07 /* swhx */;
+			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
+			projectDirPath = "";
+			targets = (
+				D2AAC09C05546B4700DB518D /* swhx */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC09A05546B4700DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8FE5A3B0A5E00A6002A9020 /* api.c in Sources */,
+				E8FE5A3C0A5E00A6002A9020 /* flash_dll.c in Sources */,
+				E8FE5A3E0A5E00A6002A9020 /* flash.c in Sources */,
+				E8FE5A400A5E00A6002A9020 /* np_host.c in Sources */,
+				E8FE5A450A5E00B7002A9020 /* system.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB916108733D950010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = swhx_Prefix.pch;
+				INSTALL_PATH = "@executable_path";
+				LIBRARY_SEARCH_PATHS = (
+					"$(LIBRARY_SEARCH_PATHS)",
+					"$(SRCROOT)/../../neko/bin",
+				);
+				PRODUCT_NAME = swhx;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		1DEB916208733D950010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = swhx_Prefix.pch;
+				INSTALL_PATH = "@executable_path";
+				LIBRARY_SEARCH_PATHS = (
+					"$(LIBRARY_SEARCH_PATHS)",
+					"$(SRCROOT)/../../neko/bin",
+				);
+				PRODUCT_NAME = swhx;
+			};
+			name = Release;
+		};
+		1DEB916508733D950010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				CONFIGURATION_BUILD_DIR = "$(SRCROOT)/../bin/mac";
+				EXECUTABLE_EXTENSION = ndll;
+				EXECUTABLE_PREFIX = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					XP_MAC,
+					OSX,
+					_DEBUG,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = "";
+				LINKER_DISPLAYS_FILES_FOR_UNDEFINED_SYMBOLS = YES;
+				PREBINDING = NO;
+				PRODUCT_NAME = "Screenweaver haXe";
+				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../include/**";
+			};
+			name = Debug;
+		};
+		1DEB916608733D950010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				CONFIGURATION_BUILD_DIR = "$(SRCROOT)/../bin/mac";
+				EXECUTABLE_EXTENSION = ndll;
+				EXECUTABLE_PREFIX = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					XP_MAC,
+					OSX,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = "";
+				LINKER_DISPLAYS_FILES_FOR_UNDEFINED_SYMBOLS = NO;
+				PREBINDING = NO;
+				PRODUCT_NAME = "Screenweaver haXe";
+				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
+				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../include/**";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "swhx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB916108733D950010E9CD /* Debug */,
+				1DEB916208733D950010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB916408733D950010E9CD /* Build configuration list for PBXProject "swhx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB916508733D950010E9CD /* Debug */,
+				1DEB916608733D950010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:sampler="sampler.*" height="100%" width="100%" applicationComplete="ui.onUIReady(this);" xmlns:swhx="swhx.*" xmlns:frontend="frontend.*">
+	<mx:Script><![CDATA[import swhx.*;]]></mx:Script>
+	<mx:Label x="10" y="10" text="Screenweaver HX" fontFamily="Verdana" fontSize="22" fontWeight="bold" color="#ffffff"/>
+	<mx:Label x="10" y="40" text="sampler, v.1.0.1" color="#ffffff"/>
+	<mx:VDividedBox bottom="10" left="10" right="10" top="66">
+		<mx:HDividedBox height="100%" width="100%">
+			<mx:Panel width="155" height="100%" layout="horizontal" id="pSamples" title="Samples">
+				<mx:List width="100%" height="100%" id="listSamples" change="ui.onListChange()"></mx:List>
+			</mx:Panel>
+			<mx:Panel width="200" height="100%" layout="horizontal" id="pDescription" title="Description">
+				<mx:VBox width="100%" height="100%">
+					<mx:TextArea width="100%" height="100%" id="txtDescription" editable="false" borderStyle="none"/>
+					<mx:Canvas width="100%" height="30">
+						<mx:Button label="Run" right="5" height="22" bottom="5" enabled="true" id="btnRun">
+							<mx:click>ui.run(listSamples.selectedIndex);</mx:click>
+						</mx:Button>							
+						<mx:Button label="Sources" right="57" height="22" bottom="5" enabled="true" id="btnSources">
+							<mx:click>swhx.Api.call('sampler.sources',listSamples.selectedIndex);</mx:click>
+						</mx:Button>
+					</mx:Canvas>
+				</mx:VBox>
+			</mx:Panel>
+		</mx:HDividedBox>
+		<mx:Panel width="100%" height="126" layout="vertical" title="Console">
+			<mx:TextArea width="100%" height="100%" id="txtConsole"/>
+		</mx:Panel>
+	</mx:VDividedBox>
+	<frontend:UI id="ui"/>					
+</mx:Application>
