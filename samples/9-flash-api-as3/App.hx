@@ -5,6 +5,10 @@ class App {
 	static function hello( x : Int, y : Int ) {
 		return "hello "+(x+y);
 	}
+	
+	static function stringTest( string : String ) {
+		return string;
+	}
 
 	static function main() {		
 		swhx.Application.init(9); // Flash player 9 required.
