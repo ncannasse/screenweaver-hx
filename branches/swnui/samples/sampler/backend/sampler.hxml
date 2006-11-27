@@ -1,0 +1,4 @@
+# Sampler
+-neko ../bin/app.n
+-main Sampler
+-lib swhx
