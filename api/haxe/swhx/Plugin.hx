@@ -42,7 +42,7 @@ class Plugin {
 	public static var SEARCH = {
 		Windows: [ neko.Sys.getEnv("ProgramFiles") + "\\Mozilla Firefox\\plugins\\NPSWF32.dll" ],
 		Mac : [ "/Library/Internet Plug-Ins/Flash player.plugin" ],
-		Linux: [ "~/.mozilla/plugins/libflashplayer.so" ]
+		Linux: [ "~/.mozilla/plugins/libflashplayer.so", "/usr/lib/nsbrowser/plugins/libflashplayer.so" ]
 	};
 
 	public static function find(?_version: Int) : String {
