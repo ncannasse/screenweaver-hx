@@ -15,6 +15,9 @@
 #include "../flash_dll.h"
 #include "../flash.h"
 #include <neko/neko.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 window_list *windows = NULL;
 pthread_t main_thread_id;
@@ -22,6 +25,7 @@ pthread_t main_thread_id;
 extern flash_dll *fl_dll;
 
 int system_init() {
+	XInitThreads();
 	gtk_init(NULL,NULL);
 	main_thread_id = pthread_self();
     return 0;
@@ -44,8 +48,9 @@ library *system_library_open( const char *path ) {
 	char *expanded;
 	if (path && path[0]=='~') {
 		expanded = malloc(PATH_MAX+1);
-		strcpy(expanded,getenv("HOME"));
-		strcat(expanded,path+1);
+		char *home = getenv("HOME");
+		strcpy(expanded,home);
+		strncat(expanded,path+1,PATH_MAX-strlen(home));
 	} else {
 		expanded = strdup(path);
 	}
@@ -68,9 +73,9 @@ char *system_fullpath( const char *file ) {
 	fprintf(stderr,"system_fullpath called: %s\n", file);
 	if(realpath(file,rp)) {
 		char *result = malloc(PATH_MAX+8);
-		strcpy(result,"file:///");
-		strcat(result,rp);		
-		fprintf(stderr,"returning: %s\n",result);		
+		strcpy(result,"file://");
+		strncat(result,rp,PATH_MAX);
+		fprintf(stderr,"returning: '%s'\n",result);		
 		return result;
 	}	
 	return strdup(file);	
@@ -82,9 +87,13 @@ char *system_plugin_file_version( const char *file ){
 	// ignore 'flashplayer.bin' for now:
 	if (memcmp("flashplayer.bin",file,strlen(file))==0)		 
 		return NULL;
-	// and return version 9 for anything else:
-	else
-		return strdup("9.0");
+	// and return version 9 for anything else that exists:
+	else {
+		struct stat buf;
+		if( stat( file, &buf ) == -1 )
+			return NULL;
+	}
+	return strdup("9.0");
 }
 
 struct _window {
@@ -207,5 +216,6 @@ void system_sync_call( void func( void * ), void *param ){
 }
 
 int system_is_main_thread(){
+	fprintf(stderr,"system_is_main_thread (%s)\n", pthread_equal(main_thread_id,pthread_self())?"yes":"no" );
 	return pthread_equal(main_thread_id,pthread_self());
 }

@@ -14,7 +14,9 @@
 /* Lesser General Public License or the LICENSE file for more details.		*/
 /*																			*/
 /* ************************************************************************ */
-#pragma once
+
+#ifndef _SWHX_SYSTEM_H
+#define _SWHX_SYSTEM_H
 
 enum WindowEvent {
 	WE_DESTROY,
@@ -111,3 +113,4 @@ char *system_fullpath( const char *file );
 char *system_plugin_file_version( const char *file );
 void system_launch_url( const char *url );
 
+#endif // _SWHX_SYSTEM_H
