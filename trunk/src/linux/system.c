@@ -54,7 +54,9 @@ library *system_library_open( const char *path ) {
 	} else {
 		expanded = strdup(path);
 	}
+	#ifdef DEBUG
 	fprintf(stderr,"system_library open: %s\n",expanded);
+	#endif
 	result = (void*) dlopen(expanded,RTLD_LAZY);
 	free(expanded);
 	return result;
@@ -70,12 +72,16 @@ void system_library_close( library *l ) {
 
 char *system_fullpath( const char *file ) {
 	char rp[PATH_MAX+1];
+	#ifdef DEBUG
 	fprintf(stderr,"system_fullpath called: %s\n", file);
+	#endif
 	if(realpath(file,rp)) {
 		char *result = malloc(PATH_MAX+8);
 		strcpy(result,"file://");
 		strncat(result,rp,PATH_MAX);
+		#ifdef DEBUG
 		fprintf(stderr,"returning: '%s'\n",result);		
+		#endif
 		return result;
 	}	
 	return strdup(file);	
@@ -183,7 +189,9 @@ NPWindow* system_window_getnp( window *w ) {
 }
 
 void system_window_invalidate( window *w, NPRect *r ){
-	
+	#ifdef DEBUG
+		fprintf(stderr,"system_window_invalidate NYI\n");
+	#endif
 }
 
 void system_window_set_flash( window *w, void *f ) {
@@ -211,11 +219,40 @@ int system_window_get_prop( window *w, enum WindowProperty prop ){
 	return 0;
 }
 
+typedef struct {
+	void (*func)( void * );
+	void *param;
+} sync_call_data;
+
+static gint gtk_call_synced( gpointer _data ) {
+	sync_call_data* data = (sync_call_data*)_data;
+	#ifdef DEBUG
+	fprintf(stderr,"now calling synced: %p %p\n", data->func, data->param );
+	#endif
+	data->func( data->param );
+	free( data );
+	return FALSE;
+}
+
 void system_sync_call( void func( void * ), void *param ){
-	fprintf(stderr,"system_sync_call (TODO!)\n");
+	sync_call_data* data = (sync_call_data*)malloc( sizeof(sync_call_data) );
+	data->func = func;
+	data->param = param;
+	#ifdef DEBUG
+	fprintf(stderr,"scheduling synced call: %p %p\n", data->func, data->param );
+	#endif
+	gtk_idle_add( gtk_call_synced, (gpointer)data );
 }
 
 int system_is_main_thread(){
+	#ifdef DEBUG
 	fprintf(stderr,"system_is_main_thread (%s)\n", pthread_equal(main_thread_id,pthread_self())?"yes":"no" );
+	#endif
 	return pthread_equal(main_thread_id,pthread_self());
+}
+
+void system_launch_url( const char *url ) {
+	#ifdef DEBUG
+	fprintf(stderr,"should launch URL: %s\n", url );
+	#endif
 }
