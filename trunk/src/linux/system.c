@@ -104,6 +104,7 @@ char *system_plugin_file_version( const char *file ){
 
 struct _window {
 	GtkWidget *gwindow;
+	GtkWidget *xt_bin;
 	NPWindow npwin;
 	void *flash;	
 	on_event evt;
@@ -112,6 +113,23 @@ struct _window {
 	
 	enum WindowFlags flags;
 };
+
+void updateFlashMetrics(window *w, int width, int height) {
+	w->npwin.clipRect.bottom = height;
+	w->npwin.clipRect.right = width;
+	w->npwin.height = height;
+	w->npwin.width = width;
+}
+
+void applyFlashMetrics(window *w) {
+//	if (w->flags && WF_TRANSPARENT)
+//		reallocateOffscreenBuffer(w);
+	if (w->flash) {
+		fl_dll->table.setwindow(flashp_get_npp(w->flash),&w->npwin);
+		system_window_invalidate(w,&w->npwin.clipRect);
+	}
+}
+
 
 window* system_window_create( const char *title, int width, int height,enum WindowFlags flags, on_event f){		
 	
@@ -123,22 +141,22 @@ window* system_window_create( const char *title, int width, int height,enum Wind
 	w->p = NULL;
 	
 	gtk_window_set_default_size(GTK_WINDOW(w->gwindow), width,height);
-	gtk_widget_show(w->gwindow);
+	gtk_window_set_title( GTK_WINDOW(w->gwindow), title );
+	gtk_widget_realize(w->gwindow);
 	
 	GdkWindow *gdkwin = w->gwindow->window;
     GtkWidget *xt_bin = gtk_xtbin_new(gdkwin, NULL);
     gtk_widget_show(xt_bin);
+	w->xt_bin = xt_bin;
+	
 	NPWindow *npwin  = &(w->npwin);
 	npwin->window = (void *)GTK_XTBIN (xt_bin)->xtwindow;
     npwin->x = 0;
     npwin->y = 0;
-    npwin->width = width;
-    npwin->height = height;
     npwin->type = NPWindowTypeWindow;
     npwin->clipRect.top       = 0; 
     npwin->clipRect.left      = 0;
-    npwin->clipRect.right     = width;
-    npwin->clipRect.bottom    = height;
+	updateFlashMetrics( w, width, height );
 	
 	NPSetWindowCallbackStruct* npws=calloc(sizeof(NPSetWindowCallbackStruct),1);
     npws->type = NP_SETWINDOW;
@@ -155,7 +173,7 @@ window* system_window_create( const char *title, int width, int height,enum Wind
 }
 
 void system_window_show( window *w, int show ){
-
+	gtk_widget_show(w->gwindow);
 }
 
 
@@ -199,7 +217,10 @@ void system_window_set_flash( window *w, void *f ) {
 }
 
 void system_window_set_title( window *w, const char* title ){
-	
+	#ifdef DEBUG
+	fprintf(stderr,"system_window_set_title %s\n", title );
+	#endif
+	gtk_window_set_title( GTK_WINDOW(w->gwindow), title );
 }
 
 void system_window_drag( window *w ){
@@ -212,10 +233,36 @@ void system_window_resize( window *w, int o ){
 
 
 void system_window_set_prop( window *w, enum WindowProperty prop, int value ){
+	fprintf(stderr,"set window prop: %i, %i\n", prop, value );
+	GtkWindow *win = GTK_WINDOW(w->gwindow);
+	NPWindow *npwin = &(w->npwin);
 	
+	switch( prop ) {
+		case WP_WIDTH:
+			updateFlashMetrics( w, value, npwin->height );
+			gtk_window_resize( win, npwin->width, npwin->height );
+			gtk_xtbin_resize( w->xt_bin, npwin->width, npwin->height );
+			applyFlashMetrics(w);
+			break;
+		case WP_HEIGHT:
+			updateFlashMetrics( w, npwin->width, value );
+			gtk_window_resize( win, npwin->width, npwin->height );
+			gtk_xtbin_resize( w->xt_bin, npwin->width, npwin->height );
+			applyFlashMetrics(w);
+			break;
+		case WP_RESIZABLE:
+			// seems to resize the window to 1x1px FIXME
+			// gtk_window_set_resizable( win, FALSE );
+			break;
+	}
 }
 
 int system_window_get_prop( window *w, enum WindowProperty prop ){
+	fprintf(stderr,"get window prop: %i\n", prop );
+	switch( prop ) {
+		case WP_TRANSPARENT:
+			return 0;
+	}
 	return 0;
 }
 
