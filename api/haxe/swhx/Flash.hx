@@ -23,11 +23,6 @@
  * DAMAGE.
  */
 package swhx;
-#if haxe_109
-import neko.vm.Lock;
-#else true
-import neko.Thread.Lock;
-#end
 
 /**
 	The Flash class provides control over the content being played back in a Screenweaver HX window.
@@ -41,11 +36,11 @@ class Flash {
 
 	/**
 	<p>
-	Create a new Flash instance. 
+	Create a new Flash instance.
 	A Flash instance requires a host window of type swhx.Window.
 	The remoting server argument can be "null" in case no calls will be made from the front-end to the back-end.
 	</p>
-	*/ 
+	*/
 	public function new( w : Window, s : neko.net.RemotingServer ) {
 		f = _flash_new(untyped w.w);
 		server = s;
@@ -71,7 +66,7 @@ class Flash {
 
 	function doCall( ident : String, params : String, ret : String -> Void ) : String {
 		if( !is_main_thread() ) {
-			var l = new Lock();
+			var l = new neko.vm.Lock();
 			var r = null;
 			var ret = function(result) {
 				r = result;
@@ -149,7 +144,7 @@ class Flash {
 	<p>
 	Internal method that handles URL requests originating from the front-end.
 	This method can be overidden to register, filter or block front-end URL requests.
-	Overrides that do not wish to block data retreival should invoke ''super.onGetURL(...)''. 
+	Overrides that do not wish to block data retreival should invoke ''super.onGetURL(...)''.
 	</p>
 	*/
 	public function onGetURL( s : Stream, url : String, postData : String) : Void {
@@ -206,7 +201,7 @@ class Flash {
 			s.reportError();
 		}
 	}
-	
+
 	/**
 	<p>
 	Callback function that will be triggered upon the front-end invoking an fscommand.
@@ -237,7 +232,7 @@ class Flash {
 	}
 
 	/**
-	<p> 
+	<p>
 	Returns the value of the indicated "EMBEDDED" attribute.
 	</p>
 	*/
@@ -257,7 +252,7 @@ class Flash {
 	public function setAttribute( att : String, value : String ) {
 		_flash_set_attribute(f,untyped att.__s,untyped value.__s);
 	}
-	
+
 	/**
 	<p>
 	Callback function that will be triggered when Screenweaver is finished loading the Flash movie specified by the "SRC" attribute.
