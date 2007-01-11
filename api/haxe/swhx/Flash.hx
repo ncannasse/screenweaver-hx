@@ -55,11 +55,7 @@ class Flash {
 		},function(s,url,post) {
 			// there's a maximum number of concurrent threads set by the GC
 			// if reached, it might be useful to write some thread manager
-			#if haxe_109
 			neko.vm.Thread.create(callback(me.onGetURL,new Stream(s),new String(url),if( post == null ) null else new String(post)));
-			#else true
-			neko.Thread.create(callback(me.onGetURL,new Stream(s),new String(url)),if( post == null ) null else new String(post));
-			#end
 		});
 		me.loaded = false;
 	}
