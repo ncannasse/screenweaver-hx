@@ -24,15 +24,10 @@
  */
 
 package swhx;
-#if haxe_109
-import neko.vm.Thread;
-#else true
-import neko.Thread;
-#end
 
 class Task {
 
-	static var t = #if haxe_109 Thread.create(loop) #else true Thread.create(function(_){ loop(); },null) #end;
+	static var t = neko.vm.Thread.create(loop);
 
 	public static function onError( e : Dynamic ) {
 		var str = try Std.string(e) catch( e : Dynamic ) "???";
@@ -41,7 +36,7 @@ class Task {
 
 	static function loop() {
 		while( true ) {
-			var m = Thread.readMessage(true);
+			var m = neko.vm.Thread.readMessage(true);
 			try {
 				var r = m.call();
 				if( m.onResult != null )
@@ -66,11 +61,7 @@ class Task {
 				onError(e);
 			}
 		};
-		#if haxe_109
-		Thread.create(f);
-		#else true
-		Thread.create(function(_) { f(); },null);
-		#end
+		neko.vm.Thread.create(f);
 	}
 
 	static var sync_call = neko.Lib.load("swhx","sync_call",1);
