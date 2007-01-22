@@ -14,8 +14,13 @@
 /* Lesser General Public License or the LICENSE file for more details.		*/
 /*																			*/
 /* ************************************************************************ */
-#include <neko/neko.h>
-#include <neko/neko_vm.h>
+#ifdef NEKO_INSTALLER
+#	include <neko.h>
+#	include <neko_vm.h>
+#else
+#	include <neko/neko.h>
+#	include <neko/neko_vm.h>
+#endif
 #include "system.h"
 #include "flash_dll.h"
 #include "flash.h"
