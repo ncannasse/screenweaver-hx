@@ -242,7 +242,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	w->npwin.type = NPWindowTypeDrawable;
 
 	updateFlashMetrics(w, width, height);
-	if (w->flags && WF_TRANSPARENT)
+	if (w->flags & WF_TRANSPARENT)
 		reallocateOffscreenBuffer(w);
 	SetWindowTitleWithCFString (ref, cftitle);
 
