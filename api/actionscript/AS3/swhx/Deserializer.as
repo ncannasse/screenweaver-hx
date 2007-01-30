@@ -1,4 +1,4 @@
-﻿/* ************************************************************************ */
+/* ************************************************************************ */
 /*																			*/
 /*  ScreenWeaver HX															*/
 /*  Copyright (c)2006 Edwin van Rijkom, Nicolas Cannasse					*/
@@ -15,29 +15,29 @@
 /*																			*/
 /* ************************************************************************ */
 package swhx {
-	
+
 	public class Deserializer {
-		
+
 		var buf : String;
 		var pos : Number;
 		var length : Number;
 		var cache : Array;
 		var scache : Array;
-				
+
 		static var reEscBackslash: RegExp = /\\\\/g;
 		static var reEscNewline: RegExp = /\\n/g;
 		static var reEscReturn: RegExp = /\\r/g;
 		static var delim: String = "##__delim__##";
 		static var reDelim: RegExp = /##__delim__##/g;
-		
-		public function Deserializer(buf: String) {		
+
+		public function Deserializer(buf: String) {
 			this.buf = buf;
 			length = buf.length;
 			pos = 0;
 			scache = new Array();
 			cache = new Array();
 		}
-		
+
 		private function readDigits(): Number {
 			var k = 0;
 			var s = false;
@@ -63,7 +63,7 @@ package swhx {
 				k *= -1;
 			return k;
 		}
-		
+
 		public function deserializeObject(o) {
 			while( true ) {
 				if( pos >= length )
@@ -78,8 +78,8 @@ package swhx {
 			}
 			pos++;
 		}
-	
-		public function deserialize() : Object { 		
+
+		public function deserialize() : Object {
 			switch( buf.charCodeAt(pos++) ) {
 			case 110: // n
 				return null;
@@ -112,22 +112,14 @@ package swhx {
 				return Number.NEGATIVE_INFINITY;
 			case 112: // p
 				return Number.POSITIVE_INFINITY;
-			case 115: // s
+			case 121: // y
 				var len = readDigits();
 				if( buf.charAt(pos++) != ":" || length - pos < len )
 					throw "Flash deserializer: Invalid string length";
 				var s = buf.substr(pos,len);
-				pos += len; 			
+				s = decodeURIComponent(s);
+				pos += len;
 				scache.push(s);
-				return s;
-			case 106: // j
-				var len = readDigits();
-				if( buf.charAt(pos++) != ":" )
-					throw "Flash deserializer: Invalid string length";
-				var s = buf.substr(pos,len);
-				pos += len;				
-				s = s.replace(reEscBackslash,delim).replace(reEscReturn,"\r").replace(reEscNewline,"\n").replace(reDelim,"\\");
- 				scache.push(s);
 				return s;
 			case 97: // a
 				var a = new Array();
@@ -171,13 +163,31 @@ package swhx {
 				throw "Flash deserializer: cannot handle classes";
 			case 119: // w
 				throw "Flash deserializer: cannot handle enumerations";
+			// deprecated
+			case 115: // s
+				var len = readDigits();
+				if( buf.charAt(pos++) != ":" || length - pos < len )
+					throw "Flash deserializer: Invalid string length";
+				var s = buf.substr(pos,len);
+				pos += len;
+				scache.push(s);
+				return s;
+			case 106: // j
+				var len = readDigits();
+				if( buf.charAt(pos++) != ":" )
+					throw "Flash deserializer: Invalid string length";
+				var s = buf.substr(pos,len);
+				pos += len;
+				s = s.replace(reEscBackslash,delim).replace(reEscReturn,"\r").replace(reEscNewline,"\n").replace(reDelim,"\\");
+ 				scache.push(s);
+				return s;
 			default:
 			}
 			pos--;
 			throw("Flash deserializer: Invalid char "+buf.charAt(pos)+" at position "+pos);
 		}
-		
-		public static function run( v : String ) : Object {		
+
+		public static function run( v : String ) : Object {
 			return (new Deserializer(v)).deserialize();
 		}
 }
