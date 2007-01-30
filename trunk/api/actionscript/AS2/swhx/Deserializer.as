@@ -1,4 +1,4 @@
-﻿/* ************************************************************************ */
+/* ************************************************************************ */
 /*																			*/
 /*  ScreenWeaver HX															*/
 /*  Copyright (c)2006 Edwin van Rijkom, Nicolas Cannasse					*/
@@ -16,21 +16,21 @@
 /* ************************************************************************ */
 
 class swhx.Deserializer {
-	
+
 	var buf : String;
 	var pos : Number;
 	var length : Number;
 	var cache : Array;
 	var scache : Array;
-	
-	public function Deserializer(buf: String) {		
+
+	public function Deserializer(buf: String) {
 		this.buf = buf;
 		length = buf.length;
 		pos = 0;
 		scache = new Array();
 		cache = new Array();
 	}
-	
+
 	private function readDigits(): Number {
  		var k = 0;
  		var s = false;
@@ -56,7 +56,7 @@ class swhx.Deserializer {
  			k *= -1;
  		return k;
  	}
-	
+
 	public function deserializeObject(o) {
  		while( true ) {
  			if( pos >= length )
@@ -72,7 +72,7 @@ class swhx.Deserializer {
  		pos++;
 	}
 
- 	public function deserialize() : Object { 		
+ 	public function deserialize() : Object {
 		switch( buf.charCodeAt(pos++) ) {
  		case 110: // n
  			return null;
@@ -99,29 +99,21 @@ class swhx.Deserializer {
  			if( f == null )
  				throw ("Invalid float "+s);
  			return f;
+ 		case 121: // y
+ 			var len = readDigits();
+ 			if( buf.charAt(pos++) != ":" || length - pos < len )
+ 				throw "Invalid string length";
+			var s = buf.substr(pos,len);
+			pos += len;
+			s = StringTools.urlDecode(s);
+			scache.push(s);
+			return s;
  		case 107: // k
  			return Number.NaN;
  		case 109: // m
  			return Number.NEGATIVE_INFINITY;
  		case 112: // p
  			return Number.POSITIVE_INFINITY;
- 		case 115: // s
- 			var len = readDigits();
- 			if( buf.charAt(pos++) != ":" || length - pos < len )
-				throw "Invalid string length";
-			var s = buf.substr(pos,len);
- 			pos += len; 			
-			scache.push(s);
-			return s;
- 		case 106: // j
- 			var len = readDigits();
- 			if( buf.charAt(pos++) != ":" )
- 				throw "Invalid string length";
- 			var s = buf.substr(pos,len);
- 			pos += len;
- 			s = s.split("\\r").join("\r").split("\\n").join("\n").split("\\\\").join("\\");
- 			scache.push(s);
- 			return s;
  		case 97: // a
  			var a = new Array();
  			cache.push(a);
@@ -164,13 +156,32 @@ class swhx.Deserializer {
 	 		throw "Flash deserializer cannot handle classes";
 		case 119: // w
 			throw "Flash deserializer cannot handle enumerations";
+		// deprecated
+ 		case 115: // s
+ 			var len = readDigits();
+ 			if( buf.charAt(pos++) != ":" || length - pos < len )
+				throw "Invalid string length";
+			var s = buf.substr(pos,len);
+ 			pos += len;
+			scache.push(s);
+			return s;
+ 		case 106: // j
+ 			var len = readDigits();
+ 			if( buf.charAt(pos++) != ":" )
+ 				throw "Invalid string length";
+ 			var s = buf.substr(pos,len);
+ 			pos += len;
+ 			s = s.split("\\r").join("\r").split("\\n").join("\n").split("\\\\").join("\\");
+ 			scache.push(s);
+ 			return s;
+
  		default:
  		}
  		pos--;
  		throw("Invalid char "+buf.charAt(pos)+" at position "+pos);
  	}
-	
-	public static function run( v : String ) : Object {		
+
+	public static function run( v : String ) : Object {
 		return (new Deserializer(v)).deserialize();
 	}
 }
