@@ -105,7 +105,7 @@ class swhx.Deserializer {
  				throw "Invalid string length";
 			var s = buf.substr(pos,len);
 			pos += len;
-			s = StringTools.urlDecode(s);
+			s = unescape(s);
 			scache.push(s);
 			return s;
  		case 107: // k
