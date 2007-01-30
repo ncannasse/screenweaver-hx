@@ -29,7 +29,7 @@ class Plugin {
 	public static var PLAYER = "flashplayer.bin";
 
 	public static var URLS = {
-		Windows : "http://fpdownload.macromedia.com/get/flashplayer/xpi/current/flashplayer-win.xpi",		
+		Windows : "http://fpdownload.macromedia.com/get/flashplayer/xpi/current/flashplayer-win.xpi",
 		Mac : "http://fpdownload.macromedia.com/get/flashplayer/xpi/current/flashplayer-mac.xpi",
 		Linux : "http://fpdownload.macromedia.com/get/flashplayer/xpi/current/flashplayer-linux.xpi"
 	};
@@ -48,29 +48,29 @@ class Plugin {
 	public static function find(?_version: Int) : String {
 		var system = neko.Sys.systemName();
 		var path = PLAYER;
-		
+
 		if( system == "Mac" )
 			path += OSX_BUNDLE_PATH;
-		
+
 		// look in default location first:
 		var version : String = _fileversion(untyped path.__s);
 		// don't check the version : this should be the one we downloaded
-		if( version != null ) 
-			return path; 
-		
+		if( version != null )
+			return path;
+
 		// search for a pre-installed player:
 		var search_list: Array<String> = Reflect.field(SEARCH,system);
 		for( p in search_list ) {
 			var version = new String(_fileversion(untyped p.__s));
 			if( version != null ) {
-				var ord_version = Std.parseInt(version.substr(0,version.indexOf(".")));	
+				var ord_version = Std.parseInt(version.substr(0,version.indexOf(".")));
 				var min_version = if (_version == null) 8; else _version;
 				if( min_version <= ord_version ) {
 					if( system == "Mac" )
 						p += OSX_BUNDLE_PATH;
 					return p;
 				}
-			}	       
+			}
 		}
 
 		// try to download a player:
@@ -85,7 +85,7 @@ class Plugin {
 		try {
 			var url = Reflect.field(URLS,sysname);
 			var data = haxe.Http.request(url);
-			var zip = neko.zip.File.read(new neko.io.StringInput(data));
+			var zip = neko.zip.File.readZip(new neko.io.StringInput(data));
 			if( sysname == "Windows" ) {
 				for( file in zip ) {
 					if( file.fileName == WIN32_DLL ) {
@@ -101,7 +101,7 @@ class Plugin {
 			// on OSX, unzip the whole directory recursively
 			var ol =  OSX_ZIP_PATH.length;
 			for( file in zip ) {
-				var name = file.fileName;				
+				var name = file.fileName;
 				if( name.length <= ol || name.substr(0,ol) != OSX_ZIP_PATH )
 					continue;
 				name = PLAYER + name.substr(ol,name.length - ol);
@@ -114,7 +114,7 @@ class Plugin {
 				f.write(data);
 				f.close();
 			}
-			
+
 		} catch( e : Dynamic ) {
 			throw "An error occured while updating the Flash plugin ("+Std.string(e)+")";
 		}
