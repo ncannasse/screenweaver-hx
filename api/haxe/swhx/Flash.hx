@@ -166,6 +166,7 @@ class Flash {
 				f = neko.io.File.read(url,true);
 			} catch( e : Dynamic ) {
 				s.reportError();
+				return;
 			}
 			s.prepare(size);
 			var bufsize = (1 << 16); // 65K
@@ -173,6 +174,7 @@ class Flash {
 			while( size > 0 ) {
 				var bytes = f.readBytes(buf,0,bufsize);
 				if( bytes <= 0 ) {
+					f.close();
 					s.reportError();
 					return;
 				}
@@ -181,6 +183,7 @@ class Flash {
 				while( bytes > 0 ) {
 					var k = s.writeBytes(buf,pos,bytes);
 					if( k <= 0 ) {
+						f.close();
 						s.reportError();
 						return;
 					}
@@ -189,6 +192,7 @@ class Flash {
 				}
 			}
 			s.close();
+			f.close();
 			if (!loaded) {
 				loaded = true;
 				sync_call(onSourceLoaded);
