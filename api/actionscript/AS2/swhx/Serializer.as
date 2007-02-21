@@ -193,7 +193,7 @@ class swhx.Serializer{
         this.scache.push(value);
         this.buf += "y";
         value = escape(value);
-        this.buf += value.length;
+        this.buf = this.buf + value.length;
         this.buf += ":";
         this.buf += value;
     };
