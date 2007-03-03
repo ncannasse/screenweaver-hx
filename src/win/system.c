@@ -25,8 +25,6 @@
 
 window_list *windows = NULL;
 extern flash_dll *fl_dll;
-extern void worker_init_vm();
-extern void worker_exec_call(void *v);
 
 // -------------------------------------- 64-bit compat ----------------------------------
 // GetWindowLongPtr and SetWindowLongPtr should not issue a 64-bit compatibility
@@ -75,10 +73,18 @@ static LARGE_INTEGER hdtimer_frequency = {0,0};
 #define ULW_ALPHA 0x00000002
 #define WM_SYNCCALL		(WM_USER + 0xFD)
 
+typedef struct _queue {
+	gen_callback f;
+	void *param;
+	struct _queue *next;
+} mqueue;
+
 typedef BOOL WINAPI UpdateLayeredWindowProc(HWND,HDC,POINT *,SIZE *,HDC,POINT *,COLORREF,BLENDFUNCTION *,DWORD);
 static UpdateLayeredWindowProc* pUpdateLayeredWindow = NULL;
 static HMODULE user32 = NULL;
 static DWORD main_thread_id;
+static mqueue *main_queue = NULL;
+static CRITICAL_SECTION main_lock;
 
 int system_init() {
 	WNDCLASSEX wcl;
@@ -108,6 +114,7 @@ int system_init() {
 		if (!pUpdateLayeredWindow)
 			FreeLibrary(user32);
 	}
+	InitializeCriticalSection(&main_lock);
 
 	return 0;
 }
@@ -122,8 +129,16 @@ void system_cleanup() {
 }
 
 void system_sync_call( gen_callback func, void *param ) {
-	// send to the main thread
-	PostThreadMessage(main_thread_id,WM_SYNCCALL,(WPARAM)func,(LPARAM)param);
+	// adds message to the queue
+	mqueue *m = malloc(sizeof(mqueue));
+	m->f = func;
+	m->param = param;
+	EnterCriticalSection(&main_lock);
+	m->next = main_queue;
+	main_queue = m;
+	LeaveCriticalSection(&main_lock);
+	// notice the main thread
+	PostThreadMessage(main_thread_id,WM_SYNCCALL,0,0);
 }
 
 int system_is_main_thread() {
@@ -207,7 +222,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	DWORD exstyle = 0;
 	window *w = malloc(sizeof(struct _window));
 	memset(w,0,sizeof(struct _window));
-	w->flags = flags ^ WF_FLASH_RUNNING;	
+	w->flags = flags ^ WF_FLASH_RUNNING;
 	w->npwin.width = width;
 	w->npwin.height = height;
 
@@ -599,13 +614,22 @@ void onFlashStop( window *w ) {
 void system_loop() {
 	MSG msg;
 	while( GetMessage(&msg,NULL,0,0) ) {
-		if( msg.message == WM_SYNCCALL ) {
-			((gen_callback)msg.wParam)((void*)msg.lParam);
-			continue;
-		}
-		if( TranslateAccelerator(0, 0, &msg) == 0 ) {
+		if( msg.message != WM_SYNCCALL && TranslateAccelerator(0, 0, &msg) == 0 ) {
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+		}
+		while( main_queue ) {
+			mqueue m;
+			EnterCriticalSection(&main_lock);
+			if( main_queue == NULL ) {
+				LeaveCriticalSection(&main_lock);
+				break;
+			}
+			m = *main_queue;
+			free(main_queue);
+			main_queue = m.next;
+			LeaveCriticalSection(&main_lock);
+			m.f(m.param);
 		}
 	}
 }
@@ -662,7 +686,7 @@ void paintBackBufferStd( window *w, NPRect *r) {
 
 void paintBackBufferTrans( window *w, NPRect *r) {
 	static BLENDFUNCTION bf = {0,0,0xFF,AC_SRC_ALPHA};
-	static POINT pos = {0,0};	
+	static POINT pos = {0,0};
 	SIZE size = {w->npwin.width,w->npwin.height};
 	long i,x,xm,y,ym,offset,offsetl;
 	BYTE a;
@@ -719,7 +743,7 @@ void paintBackBufferTrans( window *w, NPRect *r) {
 			ba[i+2] = (ba[i+2]*a) >> 8;
 			ba[i+3] = a;
 		}
-	}	
+	}
 	pUpdateLayeredWindow(w->hwnd,w->bbuffer_hdc,0,&size,w->bbuffer_hdc,&pos,0,&bf,ULW_ALPHA);
 /*
 #ifdef _DEBUG
