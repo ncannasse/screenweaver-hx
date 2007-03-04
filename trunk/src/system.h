@@ -46,11 +46,13 @@ enum WindowProperty {
 };
 
 enum WindowFlags {
-	WF_FULLSCREEN = 1,
-	WF_TRANSPARENT = 1 << 1,
-	WF_FLASH_RUNNING = 1 << 2,
-	WF_DROPTARGET = 1 << 3,
-	WF_PLAIN = 1 << 4
+	WF_FULLSCREEN		= 1,
+	WF_TRANSPARENT		= 1 << 1,
+	WF_FLASH_RUNNING	= 1 << 2,
+	WF_DROPTARGET		= 1 << 3,
+	WF_PLAIN			= 1 << 4,
+	WF_ALWAYS_ONTOP		= 1 << 5,
+	WF_NO_TASKBAR		= 1 << 6
 };
 
 #include <npapi/npapi.h>

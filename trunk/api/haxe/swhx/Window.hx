@@ -81,10 +81,12 @@ class Window {
 	/**Get/Set window maximized state.**/
 	public var maximized(getMaximized,setMaximized) : Bool;
 	
-	public static var WF_FULLSCREEN = 1;
-	public static var WF_TRANSPARENT = 1 << 1;
-	public static var WF_DROPTARGET = 1 << 3;
-	public static var WF_PLAIN = 1 << 4;
+	public static var WF_FULLSCREEN	= 1;
+	public static var WF_TRANSPARENT	= 1 << 1;
+	public static var WF_DROPTARGET	= 1 << 3;
+	public static var WF_PLAIN			= 1 << 4;
+	public static var WF_ALWAYS_ONTOP	= 1 << 5;
+	public static var WF_NO_TASKBAR	= 1 << 6;
 
 	public function new( title : String, width : Int, height : Int, ?flags : Int ) {		
 		this.title = title;
