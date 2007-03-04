@@ -17,9 +17,13 @@ TODO:
 	
 FEATURE IDEAS:	
 	allow to render a neko string buffer on the window
-	pop-up menu support	
+	pop-up menu support
 	
-2006-11-5 : 1.0.5
+2007-03-04 : 1.0.6
+	top-most and no-taskbar-icon support (Win)
+	misc. Actionscript API fixes
+		
+2006-11-05 : 1.0.5
 	added swhx.Application.init minimal version argument
 	added swhx.Flash.onSourceLoaded event 
 	added swroot and swindex value options to boot-loader list.pinfo (Mac)
