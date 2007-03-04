@@ -222,6 +222,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	DWORD exstyle = 0;
 	window *w = malloc(sizeof(struct _window));
 	memset(w,0,sizeof(struct _window));
+	w->flags = flags ^ WF_FLASH_RUNNING;
 	w->npwin.width = width;
 	w->npwin.height = height;
 
@@ -229,10 +230,6 @@ window *system_window_create( const char *title, int width, int height, enum Win
 		exstyle |= WS_EX_TOPMOST;
 	if ( flags & WF_NO_TASKBAR )
 		exstyle |= WS_EX_TOOLWINDOW;
-
-
-
-
 
 	if (flags & WF_TRANSPARENT && pUpdateLayeredWindow) {
 		exstyle |=  0x80000; //== WS_EX_LAYERED;
@@ -242,7 +239,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	} else {
 		if (flags & WF_PLAIN) {
 			style = WS_POPUP | WS_BORDER | WS_SYSMENU;
-			exstyle = WS_EX_APPWINDOW;
+			exstyle |= WS_EX_APPWINDOW;			
 		} else {
 			style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 		}
