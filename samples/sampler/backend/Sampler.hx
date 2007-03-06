@@ -43,10 +43,9 @@ class Sampler {
 		srv.addObject("sampler",Sampler);
 		
 		ui = new swhx.Flash(win,srv);				
-		cnx = swhx.Connection.flashConnect(ui);
-		
 		ui.setAttribute("id","ui");
 		ui.setAttribute("src","sampler.swf");
+		ui.onSourceLoaded = onSourceLoaded;
 		ui.start();
 		
 		win.resizable = true;		
@@ -61,6 +60,13 @@ class Sampler {
 		
 		swhx.Application.loop();
 		swhx.Application.cleanup();		
+	}
+	
+	/**
+	* Invoked by SWHX after prim. source file hase been loaded
+	*/	
+	static function onSourceLoaded() {
+		cnx = swhx.Connection.flashConnect(ui);
 	}
 	
 	/**
