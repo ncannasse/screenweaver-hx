@@ -83,7 +83,7 @@ typedef BOOL WINAPI UpdateLayeredWindowProc(HWND,HDC,POINT *,SIZE *,HDC,POINT *,
 static UpdateLayeredWindowProc* pUpdateLayeredWindow = NULL;
 static HMODULE user32 = NULL;
 static DWORD main_thread_id;
-static mqueue *main_queue = NULL;
+static mqueue *main_queue = NULL, *main_head = NULL;
 static CRITICAL_SECTION main_lock;
 
 int system_init() {
@@ -133,8 +133,12 @@ void system_sync_call( gen_callback func, void *param ) {
 	mqueue *m = malloc(sizeof(mqueue));
 	m->f = func;
 	m->param = param;
+	m->next = NULL;
 	EnterCriticalSection(&main_lock);
-	m->next = main_queue;
+	if( main_queue == NULL )
+		main_head = m;		
+	else
+		main_queue->next = m;		
 	main_queue = m;
 	LeaveCriticalSection(&main_lock);
 	// notice the main thread
@@ -629,16 +633,18 @@ void system_loop() {
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 		}
-		while( main_queue ) {
+		while( main_head ) {
 			mqueue m;
 			EnterCriticalSection(&main_lock);
-			if( main_queue == NULL ) {
+			if( main_head == NULL ) {
 				LeaveCriticalSection(&main_lock);
 				break;
 			}
-			m = *main_queue;
-			free(main_queue);
-			main_queue = m.next;
+			m = *main_head;
+			free(main_head);
+			main_head = m.next;
+			if( main_head == NULL )
+				main_queue = NULL;
 			LeaveCriticalSection(&main_lock);
 			m.f(m.param);
 		}

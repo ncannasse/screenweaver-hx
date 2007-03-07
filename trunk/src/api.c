@@ -50,7 +50,7 @@
 
 #define val_window(x) ((window*)val_data(x))
 #define val_window_msg_hook(x) ((window_msg_hook*)val_data(x))
-#define val_window_msg_cb(x) ((msg_hook_callback*)val_data(x))
+#define val_window_msg_cb(x) ((msg_hook_callback)val_data(x))
 #define val_flash(x) ((flash*)val_data(x))
 #define val_stream(x) ((stream*)val_data(x))
 
@@ -416,11 +416,11 @@ void* window_invoke_msg_hooks( window *w, void *id, void *p1, void *p2 ) {
 			} else if (l->hook->fn) {
 				// Neko invokation
 				value exc = NULL;
-				value result = val_int(val_callEx(val_null,l->hook->fn,NULL,0,&exc));			 
+				value result = val_callEx(val_null,l->hook->fn,NULL,0,&exc);
 				if( exc != NULL )
 					val_rethrow(exc);
-				if (val_int(result))
-					return (void*) val_int(result);
+				if( val_int(result) )
+					return (void*)val_int(result);
 			}
 		}
 		l = l->next;		
@@ -710,10 +710,6 @@ static int stream_data( stream *s, char *buf, int size ) {
 		return size; // we will make sure that all the buffer is written, see over
 	}	
 #	endif
-	
-	// Nicolas, sleeping a little works around the bug for now:
-	Sleep(500);
-
 	len = fl_dll->table.writeready(s->inst,&s->stream);
 	if( len <= 0 )
 		return len;
