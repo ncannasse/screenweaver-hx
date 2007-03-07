@@ -75,17 +75,18 @@ struct _private_data {
 };
 
 typedef struct _window_msg_hook {
-	void *id;				// message id to listen for
-	void *p1;
+	void *id1;				// message id to listen for
+	void *id2;
+	void *p1;				// params
 	void *p2;
 	msg_hook_callback fc;	// C to C callback
 	value fn;				// Neko callback
-} window_msg_hook;
+};
 
 typedef struct _msg_hook_list {
 	window_msg_hook *hook;
 	struct _msg_hook_list *next;
-} msg_hook_list;
+};
 
 flash_dll *fl_dll = NULL;
 static int in_call = 0;
@@ -353,9 +354,10 @@ static value window_get_handle( value w ) {
 	return alloc_abstract(k_window_handle,system_window_get_handle(val_window(w)));
 }
 
-static value window_add_message_hook( value w, value id ) {	
+static value window_add_message_hook( value w, value id1, value id2 ) {	
 	val_check_kind(w,k_window);
-	val_check(id,int32);
+	val_check(id1,int32);
+	val_check(id2,int32);
 	{
 		msg_hook_list *n;
 		msg_hook_list **ll;
@@ -363,7 +365,8 @@ static value window_add_message_hook( value w, value id ) {
 		l->next = NULL;
 		l->hook = malloc(sizeof(struct _window_msg_hook));
 		memset(l->hook,0,sizeof(struct _window_msg_hook));
-		l->hook->id = (void*) val_int32(id);		
+		l->hook->id1 = (void*) val_int32(id1);
+		l->hook->id2 = (void*) val_int32(id2);
 		ll = system_window_get_msg_hook_list(val_window(w));
 		if (n=*ll) {			
 			while (n->next) n=n->next;
@@ -402,15 +405,15 @@ static value window_remove_message_hook( value win, value hook ) {
 	}
 }
 
-void* window_invoke_msg_hooks( window *w, void *id, void *p1, void *p2 ) {
+void* window_invoke_msg_hooks( window *w, void *id1, void *id2, void *p1, void *p2 ) {
 	msg_hook_list *l = *system_window_get_msg_hook_list(w);
 	while(l) {
-		if (l->hook->id == id) {
+		if (l->hook->id1 == id1 && l->hook->id2 == id2) {
 			l->hook->p1 = p1;
 			l->hook->p2 = p2;
 			if (l->hook->fc) {
 				// direct C to C invokation
-				void *result = l->hook->fc(l->hook,id,p1,p2); 
+				void *result = l->hook->fc(l->hook,id1,id2,p1,p2); 
 				if (result)
 					return result;
 			} else if (l->hook->fn) {
@@ -698,7 +701,7 @@ static void stream_data_sync( void *_sb ) {
 #endif
 
 static int stream_data( stream *s, char *buf, int size ) {
-	int len;
+	int len;	
 #	ifdef STREAM_SYNC
 	if (!system_is_main_thread()) {
 		stream_buffer *sb = (stream_buffer*)malloc(sizeof(stream_buffer));
@@ -760,7 +763,7 @@ DEFINE_PRIM(window_resize,2);
 DEFINE_PRIM(window_set_prop,3);
 DEFINE_PRIM(window_get_prop,2);
 DEFINE_PRIM(window_get_handle,1);
-DEFINE_PRIM(window_add_message_hook,2);
+DEFINE_PRIM(window_add_message_hook,3);
 DEFINE_PRIM(window_remove_message_hook,2);
 
 DEFINE_PRIM(msghook_set_c_callback,2);

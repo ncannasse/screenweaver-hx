@@ -18,6 +18,10 @@ TODO:
 FEATURE IDEAS:	
 	allow to render a neko string buffer on the window
 	pop-up menu support
+
+2007-03-07 : 1.0.7
+	added Window.getHandle
+	added window message hook support (Win)
 	
 2007-03-04 : 1.0.6
 	top-most and no-taskbar-icon support (Win)

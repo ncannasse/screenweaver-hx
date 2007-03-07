@@ -119,8 +119,12 @@ class Window {
 		_window_destroy(w);
 	}
 	
-	public function addMessageHook(msgid: Void) {
-		return new MessageHook(_window_add_message_hook(w,msgid),msgid);
+	public function addMessageHook(msgid1: Void, ?msgid2: Void) {		
+		return new MessageHook
+			(	_window_add_message_hook(w,msgid1,if (msgid2!=null) msgid2 else untyped 0)
+			,	msgid1
+			,	if (msgid2!=null) msgid2 else untyped 0
+			);
 	}
 	
 	public function removeMessageHook(h: MessageHook) {
@@ -328,7 +332,7 @@ class Window {
 	static var _window_drag = neko.Lib.load("swhx","window_drag",1);
 	static var _window_resize = neko.Lib.load("swhx","window_resize",2);
 	static var _window_get_handle = neko.Lib.load("swhx", "window_get_handle", 1);
-	static var _window_add_message_hook = neko.Lib.load("swhx", "window_add_message_hook", 2);
+	static var _window_add_message_hook = neko.Lib.load("swhx", "window_add_message_hook", 3);
 	static var _window_remove_message_hook = neko.Lib.load("swhx", "window_remove_message_hook", 2);
 	
 	static var _window_on_destroy = neko.Lib.load("swhx","window_on_destroy",2);

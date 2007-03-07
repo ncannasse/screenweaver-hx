@@ -66,11 +66,10 @@ typedef struct {
 
 typedef struct _window window;
 typedef struct _window_msg_hook window_msg_hook;
-typedef void *(*msg_hook_callback) ( window_msg_hook *h, void *msg_id, void *p1, void *p2 );
+typedef struct _msg_hook_list msg_hook_list;
+typedef void *(*msg_hook_callback) ( window_msg_hook *h, void *id1, void*id2, void *p1, void *p2 );
 typedef struct _library library;
 typedef struct _private_data private_data;
-typedef struct _window_msg_hook window_msg_hook;
-typedef struct _msg_hook_list msg_hook_list;
 typedef int (*on_event)( window *w, enum WindowEvent e, void* );
 typedef int (*on_npevent)( window *w, NPEvent *e );
 typedef void (*gen_callback)( void * );
