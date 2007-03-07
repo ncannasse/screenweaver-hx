@@ -32,14 +32,16 @@ Use the available meth
 class MessageHook {
 
 	var h 	: Void;
-	var id	: Void; // Int32
+	var id1	: Void; 
+	var id2 : Void;
 	
 	public var p1(getP1,null) : Void;
 	public var p2(getP2,null) : Void;
 	
-	public function new( hook, msgid ) {		
+	public function new( hook, msgid1, msgid2 ) {		
 		h = hook;
-		id = msgid;
+		id1 = msgid1;
+		id2 = msgid2;
 	}
 	
 	public function setCCalback( f: Void ) {

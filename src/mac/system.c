@@ -185,6 +185,8 @@ struct _window {
 	GWorldPtr gw_b;
 	CGContextRef ctx_b;
 	unsigned char* bits_b;
+	
+	msg_hook_list *msg_hooks;
 };
 
 EventRecord nullEventRec = {0,0,0,0,0};
@@ -497,6 +499,10 @@ void system_window_resize( window *w, int o ) {
 	Rect rc;
 	GetGlobalMouse(&pt);
 	ResizeWindow(w->ref,pt,NULL,&rc);
+}
+
+msg_hook_list **system_window_get_msg_hook_list( window *w ) {
+	return &w->msg_hooks;
 }
 
 #define INSTALL_HANDLER(w,c,e,handler) {EventTypeSpec ets = {c,e}; InstallWindowEventHandler(w->ref,NewEventHandlerUPP(handler),1,&ets,w,NULL);}
