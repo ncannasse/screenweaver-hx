@@ -49,10 +49,15 @@
 #endif
 
 #define val_window(x) ((window*)val_data(x))
+#define val_window_msg_hook(x) ((window_msg_hook*)val_data(x))
+#define val_window_msg_cb(x) ((msg_hook_callback*)val_data(x))
 #define val_flash(x) ((flash*)val_data(x))
 #define val_stream(x) ((stream*)val_data(x))
 
 DEFINE_KIND(k_window);
+DEFINE_KIND(k_window_handle);
+DEFINE_KIND(k_window_msg_hook);
+DEFINE_KIND(k_window_msg_cb);
 DEFINE_KIND(k_flash);
 DEFINE_KIND(k_stream);
 
@@ -68,6 +73,19 @@ struct _private_data {
 	value vplayer;
 	value vwindow;
 };
+
+typedef struct _window_msg_hook {
+	void *id;				// message id to listen for
+	void *p1;
+	void *p2;
+	msg_hook_callback fc;	// C to C callback
+	value fn;				// Neko callback
+} window_msg_hook;
+
+typedef struct _msg_hook_list {
+	window_msg_hook *hook;
+	struct _msg_hook_list *next;
+} msg_hook_list;
 
 flash_dll *fl_dll = NULL;
 static int in_call = 0;
@@ -330,6 +348,126 @@ static value window_get_prop( value w, value p ) {
 	return alloc_int(system_window_get_prop(val_window(w),val_int(p)));
 }
 
+static value window_get_handle( value w ) {
+	val_check_kind(w,k_window);
+	return alloc_abstract(k_window_handle,system_window_get_handle(val_window(w)));
+}
+
+static value window_add_message_hook( value w, value id ) {	
+	val_check_kind(w,k_window);
+	val_check(id,int32);
+	{
+		msg_hook_list *n;
+		msg_hook_list **ll;
+		msg_hook_list *l = malloc(sizeof(struct _msg_hook_list));
+		l->next = NULL;
+		l->hook = malloc(sizeof(struct _window_msg_hook));
+		memset(l->hook,0,sizeof(struct _window_msg_hook));
+		l->hook->id = (void*) val_int32(id);		
+		ll = system_window_get_msg_hook_list(val_window(w));
+		if (n=*ll) {			
+			while (n->next) n=n->next;
+			n->next = l;
+		} else {
+			*ll = l;						
+		}			
+		return alloc_abstract(k_window_msg_hook,l->hook);		
+	}
+}
+
+static value window_remove_message_hook( value win, value hook ) {
+	val_check_kind(win,k_window);
+	val_check_kind(hook,k_window_msg_hook);
+	{
+		window *w = val_window(win);
+		window_msg_hook *h = val_window_msg_hook(hook);
+		msg_hook_list **ll = system_window_get_msg_hook_list(w);
+		msg_hook_list *l = *ll;
+		msg_hook_list *p = l;
+		while (l) {
+			if (l->hook == h) {
+				if (p==l) {
+					*ll = l->next;				
+				} else {
+					p->next = l->next;
+				}
+				free(l->hook);
+				free(l);
+				return alloc_int(1);
+			}
+			p=l;
+			l=l->next;
+		}
+		return alloc_int(0);
+	}
+}
+
+void* window_invoke_msg_hooks( window *w, void *id, void *p1, void *p2 ) {
+	msg_hook_list *l = *system_window_get_msg_hook_list(w);
+	while(l) {
+		if (l->hook->id == id) {
+			l->hook->p1 = p1;
+			l->hook->p2 = p2;
+			if (l->hook->fc) {
+				// direct C to C invokation
+				void *result = l->hook->fc(l->hook,id,p1,p2); 
+				if (result)
+					return result;
+			} else if (l->hook->fn) {
+				// Neko invokation
+				value exc = NULL;
+				value result = val_int(val_callEx(val_null,l->hook->fn,NULL,0,&exc));			 
+				if( exc != NULL )
+					val_rethrow(exc);
+				if (val_int(result))
+					return (void*) val_int(result);
+			}
+		}
+		l = l->next;		
+	}
+	return 0;
+}
+
+/* ************************************************************************* */
+// MESSAGE HOOK
+
+
+static value msghook_set_c_callback( value h, value f ) {
+	val_check_kind(h,k_window_msg_hook);
+	val_check_kind(f,k_window_msg_cb);
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		hook->fc = val_window_msg_cb(f);
+		return val_null;
+	}	
+}
+
+static value msghook_set_n_callback( value h, value f ) {
+	val_check_kind(h,k_window_msg_hook);
+	// TO DO: add proper function type checking
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		hook->fn = f;
+		return val_null;
+	}
+}
+
+static value msghook_get_param1( value h ) {
+	val_check_kind(h,k_window_msg_hook);
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		return alloc_int32(hook->p1);
+	}
+}
+
+static value msghook_get_param2( value h ) {
+	val_check_kind(h,k_window_msg_hook);
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		return alloc_int32(hook->p2);
+	}
+}
+
 /* ************************************************************************* */
 // FLASH
 
@@ -570,8 +708,12 @@ static int stream_data( stream *s, char *buf, int size ) {
 		memcpy(sb->buf,buf,size);
 		system_sync_call(stream_data_sync,sb);
 		return size; // we will make sure that all the buffer is written, see over
-	}
+	}	
 #	endif
+	
+	// Nicolas, sleeping a little works around the bug for now:
+	Sleep(500);
+
 	len = fl_dll->table.writeready(s->inst,&s->stream);
 	if( len <= 0 )
 		return len;
@@ -621,6 +763,14 @@ DEFINE_PRIM(window_drag,1);
 DEFINE_PRIM(window_resize,2);
 DEFINE_PRIM(window_set_prop,3);
 DEFINE_PRIM(window_get_prop,2);
+DEFINE_PRIM(window_get_handle,1);
+DEFINE_PRIM(window_add_message_hook,2);
+DEFINE_PRIM(window_remove_message_hook,2);
+
+DEFINE_PRIM(msghook_set_c_callback,2);
+DEFINE_PRIM(msghook_set_n_callback,2);
+DEFINE_PRIM(msghook_get_param1,1);
+DEFINE_PRIM(msghook_get_param2,1);
 
 DEFINE_PRIM(flash_new,1);
 DEFINE_PRIM(flash_set_attribute,3);

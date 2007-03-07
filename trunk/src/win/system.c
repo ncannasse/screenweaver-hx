@@ -142,7 +142,8 @@ void system_sync_call( gen_callback func, void *param ) {
 }
 
 int system_is_main_thread() {
-	return GetCurrentThreadId() == main_thread_id;
+	DWORD current = GetCurrentThreadId(); 
+	return current == main_thread_id;
 }
 
 char *system_fullpath( const char *file ) {
@@ -206,7 +207,8 @@ struct _window {
 	// window placement
 	WINDOWPLACEMENT *placement_org;
 	int	placement_int;
-
+	// message hook
+	msg_hook_list *msg_hooks;
 };
 
 static void setBackBufferStd(window *w);
@@ -388,6 +390,10 @@ private_data *system_window_get_private( window *w ) {
 
 void *system_window_get_handle( window *w ) {
 	return w->hwnd;
+}
+
+msg_hook_list **system_window_get_msg_hook_list( window *w ) {
+	return &w->msg_hooks;
 }
 
 static void onFlashStart(window *w);
@@ -769,8 +775,13 @@ void paintBackBufferTrans( window *w, NPRect *r) {
 */
 }
 
+extern void *window_invoke_msg_hooks(window *w,void *id,void* p1,void *p2);
+
 static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
-	LRESULT result;
+	// send message to registered hooks:
+	LRESULT result = (LRESULT) window_invoke_msg_hooks(w,(void*)msg,(void*)wparam,(void*)lparam);
+	if (result) return result;
+	// if the message was unhandled, do our own processing:
 	switch( msg ) {
 		case WM_CLOSE:
 			if( !w->evt(w,WE_CLOSE,NULL) )

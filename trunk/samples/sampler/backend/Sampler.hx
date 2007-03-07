@@ -12,6 +12,8 @@ class Sampler {
 	static var cnx: swhx.Connection;
 	
 	static var mac: Bool = neko.Sys.systemName()=="Mac";
+	static var sourceLoaded: Bool = false;
+	static var uiReady: Bool = false;
 	
 	/*
 	* Local storage
@@ -66,13 +68,22 @@ class Sampler {
 	* Invoked by SWHX after prim. source file hase been loaded
 	*/	
 	static function onSourceLoaded() {
+		sourceLoaded = true;		
 		cnx = swhx.Connection.flashConnect(ui);
+		start();
 	}
 	
 	/**
 	* Invoked by UI after initialized
 	*/
-	static public function onUIReady() {	
+	static public function onUIReady() {
+		uiReady = true;
+		start();
+	}	
+		
+	static public function start() {
+		if (!(uiReady && sourceLoaded)) 
+			return;
 		var path = "../../";		
 		var folders = neko.FileSystem.readDirectory(path);
 		folders = sortByPrefixedNumber(folders);
