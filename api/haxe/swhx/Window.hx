@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, Edwin van Rijkom, Nicolas Cannasse
+ * Copyright (c) 2007, Edwin van Rijkom, Nicolas Cannasse
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -53,6 +53,8 @@ class Window {
 
 	/**Get/Set the window's horizontal position on the desktop.**/
 	public var top(getTop,setTop) : Int;
+	
+	public var handle(getHandle,null) : Void;
 	
 	/**	
 	Get/Set window full-screen mode.
@@ -117,6 +119,14 @@ class Window {
 		_window_destroy(w);
 	}
 	
+	public function addMessageHook(msgid: Void) {
+		return new MessageHook(_window_add_message_hook(w,msgid),msgid);
+	}
+	
+	public function removeMessageHook(h: MessageHook) {
+		_window_remove_message_hook(w,h);
+	}
+		
 	/**
 	<p>
 	Initiate user window resizing.  
@@ -303,7 +313,11 @@ class Window {
 	function setMaximized( b ) {
 		_window_set_prop(w,13,if( b ) 1 else 0);
 		return b;
-	}	
+	}
+	
+	function getHandle() {
+		return _window_get_handle(w);
+	}
 	
 	static var _window_create = neko.Lib.load("swhx","window_create",4);
 	static var _window_show = neko.Lib.load("swhx","window_show",2);
@@ -312,7 +326,10 @@ class Window {
 	static var _window_get_prop = neko.Lib.load("swhx","window_get_prop",2);	
 	static var _window_set_title = neko.Lib.load("swhx","window_set_title",2);
 	static var _window_drag = neko.Lib.load("swhx","window_drag",1);
-	static var _window_resize = neko.Lib.load("swhx","window_resize",2);	
+	static var _window_resize = neko.Lib.load("swhx","window_resize",2);
+	static var _window_get_handle = neko.Lib.load("swhx", "window_get_handle", 1);
+	static var _window_add_message_hook = neko.Lib.load("swhx", "window_add_message_hook", 2);
+	static var _window_remove_message_hook = neko.Lib.load("swhx", "window_remove_message_hook", 2);
 	
 	static var _window_on_destroy = neko.Lib.load("swhx","window_on_destroy",2);
 	static var _window_on_close = neko.Lib.load("swhx","window_on_close",2);

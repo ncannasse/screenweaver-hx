@@ -65,8 +65,12 @@ typedef struct {
 } string_list;
 
 typedef struct _window window;
+typedef struct _window_msg_hook window_msg_hook;
+typedef void *(*msg_hook_callback) ( window_msg_hook *h, void *msg_id, void *p1, void *p2 );
 typedef struct _library library;
 typedef struct _private_data private_data;
+typedef struct _window_msg_hook window_msg_hook;
+typedef struct _msg_hook_list msg_hook_list;
 typedef int (*on_event)( window *w, enum WindowEvent e, void* );
 typedef int (*on_npevent)( window *w, NPEvent *e );
 typedef void (*gen_callback)( void * );
@@ -107,6 +111,8 @@ void system_window_resize( window *w, int o );
 
 void system_window_set_prop( window *w, enum WindowProperty prop, int value );
 int system_window_get_prop( window *w, enum WindowProperty prop );
+
+msg_hook_list **system_window_get_msg_hook_list( window *w );
 
 // MISC functions
 void system_sync_call( gen_callback func, void *param );
