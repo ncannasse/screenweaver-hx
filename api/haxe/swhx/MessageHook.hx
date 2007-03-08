@@ -44,7 +44,7 @@ class MessageHook {
 		id2 = msgid2;
 	}
 	
-	public function setCCalback( f: Void ) {
+	public function setCCallback( f: Void ) {
 		_msghook_set_c_cb(h,f);
 	}
 	
@@ -59,11 +59,19 @@ class MessageHook {
 	function getP2() {
 		return _msghook_get_param2(h);
 	}
+	
+	function getCallbackData() {
+		return _msghook_get_c_data(h);
+	}
+	
+	function setCallbackData( d ) {
+		return _msghook_set_c_data(h,d);
+	}
 		
 	static var _msghook_set_c_cb = neko.Lib.load("swhx", "msghook_set_c_callback", 2);
 	static var _msghook_set_n_cb = neko.Lib.load("swhx", "msghook_set_n_callback", 2);
 	static var _msghook_get_param1 = neko.Lib.load("swhx", "msghook_get_param1", 1);
 	static var _msghook_get_param2 = neko.Lib.load("swhx", "msghook_get_param2", 1);
-	
-	
+	static var _msghook_get_c_data = neko.Lib.load("swhx", "msghook_get_cdata", 1);
+	static var _msghook_set_c_data = neko.Lib.load("swhx", "msghook_set_cdata", 2);	
 }	

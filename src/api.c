@@ -79,6 +79,7 @@ typedef struct _window_msg_hook {
 	void *id2;
 	void *p1;				// params
 	void *p2;
+	void *cbdata;			// callback custom data
 	msg_hook_callback fc;	// C to C callback
 	value fn;				// Neko callback
 };
@@ -413,7 +414,7 @@ void* window_invoke_msg_hooks( window *w, void *id1, void *id2, void *p1, void *
 			l->hook->p2 = p2;
 			if (l->hook->fc) {
 				// direct C to C invokation
-				void *result = l->hook->fc(l->hook,id1,id2,p1,p2); 
+				void *result = l->hook->fc(l->hook->cbdata,id1,id2,p1,p2); 
 				if (result)
 					return result;
 			} else if (l->hook->fn) {
@@ -468,6 +469,23 @@ static value msghook_get_param2( value h ) {
 	{
 		window_msg_hook *hook = val_window_msg_hook(h);
 		return alloc_int32(hook->p2);
+	}
+}
+
+static value msghook_get_cdata( value h ) {
+	val_check_kind(h,k_window_msg_hook);
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		return alloc(hook->cbdata);
+	}
+}
+
+static value msghook_set_cdata( value h, value d ) {
+	val_check_kind(h,k_window_msg_hook);	
+	{
+		window_msg_hook *hook = val_window_msg_hook(h);
+		hook->cbdata = val_data(d);
+		return val_null;
 	}
 }
 
@@ -770,6 +788,8 @@ DEFINE_PRIM(msghook_set_c_callback,2);
 DEFINE_PRIM(msghook_set_n_callback,2);
 DEFINE_PRIM(msghook_get_param1,1);
 DEFINE_PRIM(msghook_get_param2,1);
+DEFINE_PRIM(msghook_set_cdata,2);
+DEFINE_PRIM(msghook_get_cdata,1);
 
 DEFINE_PRIM(flash_new,1);
 DEFINE_PRIM(flash_set_attribute,3);
