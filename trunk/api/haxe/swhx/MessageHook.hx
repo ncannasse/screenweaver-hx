@@ -37,11 +37,12 @@ class MessageHook {
 	
 	public var p1(getP1,null) : Void;
 	public var p2(getP2,null) : Void;
+	public var callbackData(getCallbackData,setCallbackData) : Void;
 	
 	public function new( hook, msgid1, msgid2 ) {		
 		h = hook;
 		id1 = msgid1;
-		id2 = msgid2;
+		id2 = if (msgid2!=null) msgid2 else untyped 0;
 	}
 	
 	public function setCCallback( f: Void ) {
@@ -65,7 +66,7 @@ class MessageHook {
 	}
 	
 	function setCallbackData( d ) {
-		return _msghook_set_c_data(h,d);
+		_msghook_set_c_data(h,d);
 	}
 		
 	static var _msghook_set_c_cb = neko.Lib.load("swhx", "msghook_set_c_callback", 2);

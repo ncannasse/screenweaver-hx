@@ -781,11 +781,11 @@ void paintBackBufferTrans( window *w, NPRect *r) {
 */
 }
 
-extern void *window_invoke_msg_hooks(window *w,void *id,void* p1,void *p2);
+extern void *window_invoke_msg_hooks(window *w,void *id1, void *id2,void* p1,void *p2);
 
 static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 	// send message to registered hooks:
-	LRESULT result = (LRESULT) window_invoke_msg_hooks(w,(void*)msg,(void*)wparam,(void*)lparam);
+	LRESULT result = (LRESULT) window_invoke_msg_hooks(w,(void*)msg,0,(void*)wparam,(void*)lparam);
 	if (result) return result;
 	// if the message was unhandled, do our own processing:
 	switch( msg ) {

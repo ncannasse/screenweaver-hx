@@ -54,6 +54,7 @@
 #define val_flash(x) ((flash*)val_data(x))
 #define val_stream(x) ((stream*)val_data(x))
 
+DEFINE_KIND(k_void_pointer);
 DEFINE_KIND(k_window);
 DEFINE_KIND(k_window_handle);
 DEFINE_KIND(k_window_msg_hook);
@@ -438,7 +439,9 @@ void* window_invoke_msg_hooks( window *w, void *id1, void *id2, void *p1, void *
 
 static value msghook_set_c_callback( value h, value f ) {
 	val_check_kind(h,k_window_msg_hook);
-	val_check_kind(f,k_window_msg_cb);
+	// TO DO: add proper function type checking
+	// sharing type defs amongst ndll's doesn't seem
+	// to work.
 	{
 		window_msg_hook *hook = val_window_msg_hook(h);
 		hook->fc = val_window_msg_cb(f);
@@ -476,12 +479,13 @@ static value msghook_get_cdata( value h ) {
 	val_check_kind(h,k_window_msg_hook);
 	{
 		window_msg_hook *hook = val_window_msg_hook(h);
-		return alloc(hook->cbdata);
+		return alloc_abstract(hook->cbdata,k_void_pointer);
 	}
 }
 
 static value msghook_set_cdata( value h, value d ) {
-	val_check_kind(h,k_window_msg_hook);	
+	val_check_kind(h,k_window_msg_hook);
+	// should check for d being abstract!!
 	{
 		window_msg_hook *hook = val_window_msg_hook(h);
 		hook->cbdata = val_data(d);
