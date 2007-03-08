@@ -1,10 +1,12 @@
+import systools.win.Tray;
 
 class App {
-
+	
 	static var flash : swhx.Flash;
 	static var cnx: swhx.Connection;
 	static var window: swhx.Window;
 	static var hook: swhx.MessageHook;
+	static var tray: Tray;
 
     static function main() {
     	 // initialize ScreenWeaver HX
@@ -44,7 +46,7 @@ class App {
     	window.show(true);
     	trace("Window handle is:"+window.handle+" (will be readable when passed to an .ndll)");
     	hook = window.addMessageHook(untyped 0x200 /*WM_MOUSEMOVE on Windows*/);
-    	hook.setNekoCallback(mouseMoveHook);
+		hook.setNekoCallback(mouseMoveHook);
     	/*
     	
     	Additionally, C to C hooks can be set. When set, the C handler takes
@@ -56,12 +58,14 @@ class App {
     	
     	For setting the handler via haXe use:
     	
-    	hook.setCCallback(|function-ptr-abstrac-value|);
+    	hook.setCCallback(|function-ptr-abstract-value|);
 		*/
+		
+		tray = new Tray(window,"swhx_16x16.ico","Hello Tray!");
     }
     
     static function mouseMoveHook() {    	
-		trace("Windows Mouse Move!" +"("+hook.p1+","+hook.p2+")");		
+		trace("Windows Mouse Move!" +"("+hook.p1+","+hook.p2+","+hook.callbackData+")");		
     	return 0;
     }    
 }
