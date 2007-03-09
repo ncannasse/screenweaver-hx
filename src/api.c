@@ -382,7 +382,8 @@ static value window_add_message_hook( value w, value id1, value id2 ) {
 
 static value window_remove_message_hook( value win, value hook ) {
 	val_check_kind(win,k_window);
-	val_check_kind(hook,k_window_msg_hook);
+	// TODO - type-checking via kind import!
+	// val_check_kind(hook,k_window_msg_hook);
 	{
 		window *w = val_window(win);
 		window_msg_hook *h = val_window_msg_hook(hook);

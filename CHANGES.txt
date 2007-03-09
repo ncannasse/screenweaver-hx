@@ -19,6 +19,9 @@ FEATURE IDEAS:
 	allow to render a neko string buffer on the window
 	pop-up menu support
 
+2007-03-08 : 1.0.8
+	window msg hook fix and extension (Win)
+
 2007-03-07 : 1.0.7
 	added Window.getHandle
 	added window message hook support (Win)

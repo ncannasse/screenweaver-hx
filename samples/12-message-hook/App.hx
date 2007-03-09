@@ -70,14 +70,12 @@ class App {
     	as an abstract to a C function pointer. SWHX uses type 'k_window_msg_cb',
     	and expects the function type to be:
     	
-    	'void *(*msg_hook_callback) ( window_msg_hook *h, void *id1, void *id2, void *p1, void *p2 )'
+    	'void *(*msg_hook_callback) ( callbackData *void, void *id1, void *id2, void *p1, void *p2 )'
     	
     	For setting the handler via haXe use:
     	
     	hook.setCCallback(|function-ptr-abstract-value|);
-		*/
-		
-		tray = new Tray(window,"swhx_16x16.ico","Hello Tray!");
+		*/		
     }
     
     static function mouseMoveHook() {    	
