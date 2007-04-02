@@ -57,11 +57,12 @@ class swhx.Deserializer {
  		return k;
  	}
 
-	public function deserializeObject(o) {
+	public function deserializeObject(o,isHash) {
+		var e = isHash?104:103; /* h or g */
  		while( true ) {
  			if( pos >= length )
  				throw "Invalid object";
- 			if( buf.charCodeAt(pos) == 103 ) /*g*/
+ 			if( buf.charCodeAt(pos) == e )
  				break;
  			var k = deserialize();
  			if( (typeof k) != "string" )
@@ -138,7 +139,7 @@ class swhx.Deserializer {
  		case 111: // o
 	 		var o = new Object;
 	 		cache.push(o);
-			deserializeObject(o);
+			deserializeObject(o,false);
 			return o;
  		case 114: // r
  			var n = readDigits();
@@ -156,6 +157,11 @@ class swhx.Deserializer {
 	 		throw "Flash deserializer cannot handle classes";
 		case 119: // w
 			throw "Flash deserializer cannot handle enumerations";
+        case 98: // b --- Hashes are handled like objects
+	 		var o = new Object;
+	 		cache.push(o);
+			deserializeObject(o,true);
+			return o;
 		// deprecated
  		case 115: // s
  			var len = readDigits();
