@@ -367,8 +367,10 @@ static value window_add_message_hook( value w, value id1, value id2 ) {
 		l->next = NULL;
 		l->hook = malloc(sizeof(struct _window_msg_hook));
 		memset(l->hook,0,sizeof(struct _window_msg_hook));
-		l->hook->id1 = (void*) val_int32(id1);
-		l->hook->id2 = (void*) val_int32(id2);
+		// Nicolas : I hope they are not real pointers, or 
+		// using 32bit integers will not be ok for 64bit procs
+		l->hook->id1 = (void*)(int_val)val_int32(id1);
+		l->hook->id2 = (void*)(int_val)val_int32(id2);
 		ll = system_window_get_msg_hook_list(val_window(w));
 		if (n=*ll) {			
 			while (n->next) n=n->next;
@@ -424,9 +426,9 @@ void* window_invoke_msg_hooks( window *w, void *id1, void *id2, void *p1, void *
 				value exc = NULL;
 				value result = val_callEx(val_null,l->hook->fn,NULL,0,&exc);
 				if( exc != NULL )
-					val_rethrow(exc);
-				if( val_int(result) )
-					return (void*)val_int(result);
+					val_rethrow(exc);				
+				if( val_int(result) ) // 64 bit compat warning !
+					return (void*)(int_val)val_int(result);
 			}
 		}
 		l = l->next;		
@@ -462,31 +464,22 @@ static value msghook_set_n_callback( value h, value f ) {
 
 static value msghook_get_param1( value h ) {
 	val_check_kind(h,k_window_msg_hook);
-	{
-		window_msg_hook *hook = val_window_msg_hook(h);
-		return alloc_int32(hook->p1);
-	}
+	return alloc_int32(val_window_msg_hook(h)->p1);
 }
 
 static value msghook_get_param2( value h ) {
 	val_check_kind(h,k_window_msg_hook);
-	{
-		window_msg_hook *hook = val_window_msg_hook(h);
-		return alloc_int32(hook->p2);
-	}
+	return alloc_int32(val_window_msg_hook(h)->p2);
 }
 
 static value msghook_get_cdata( value h ) {
 	val_check_kind(h,k_window_msg_hook);
-	{
-		window_msg_hook *hook = val_window_msg_hook(h);
-		return alloc_abstract(hook->cbdata,k_void_pointer);
-	}
+	return alloc_abstract(k_void_pointer,val_window_msg_hook(h)->cbdata);
 }
 
 static value msghook_set_cdata( value h, value d ) {
 	val_check_kind(h,k_window_msg_hook);
-	// should check for d being abstract!!
+	val_check(d,abstract);	
 	{
 		window_msg_hook *hook = val_window_msg_hook(h);
 		hook->cbdata = val_data(d);
