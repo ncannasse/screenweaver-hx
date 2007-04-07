@@ -15,6 +15,7 @@
 /*																			*/
 /* ************************************************************************ */
 #include <windows.h>
+#include <stddef.h>
 
 #define WM_MOUSEWHEEL 0x020A
 #define FLASH_PLACEHOLDER_ID "SWFlash_PlaceholderX"
@@ -785,7 +786,7 @@ extern void *window_invoke_msg_hooks(window *w,void *id1, void *id2,void* p1,voi
 
 static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 	// send message to registered hooks:
-	LRESULT result = (LRESULT) window_invoke_msg_hooks(w,(void*)msg,0,(void*)wparam,(void*)lparam);
+	LRESULT result = (LRESULT) window_invoke_msg_hooks(w,(void*)(intptr_t)msg,NULL,(void*)wparam,(void*)lparam);
 	if (result) return result;
 	// if the message was unhandled, do our own processing:
 	switch( msg ) {
