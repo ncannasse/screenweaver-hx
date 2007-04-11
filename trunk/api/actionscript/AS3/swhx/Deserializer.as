@@ -64,11 +64,12 @@ package swhx {
 			return k;
 		}
 
-		public function deserializeObject(o:*):void {
+		public function deserializeObject(o:*,isHash:Boolean):void {
+			var e:int = isHash?104:103; /* h or g */
 			while( true ) {
 				if( pos >= length )
 					throw "Flash deserializer: Invalid object";
-				if( buf.charCodeAt(pos) == 103 ) /*g*/
+				if( buf.charCodeAt(pos) == e )
 					break;
 				var k:* = deserialize();
 				if( (typeof k) != "string" )
@@ -80,6 +81,7 @@ package swhx {
 		}
 
 		public function deserialize() : * {
+			var c : int, s : String, n : uint;
 			switch( buf.charCodeAt(pos++) ) {
 			case 110: // n
 				return null;
@@ -94,14 +96,14 @@ package swhx {
 			case 100: // d
 				var p1 : int = pos;
 				while( true ) {
-					var c : int = buf.charCodeAt(pos);
+					c = buf.charCodeAt(pos);
 					// + - . , 0-9
 					if( (c >= 43 && c < 58) || c == 101 /*e*/ || c == 69 /*E*/ )
 						pos++;
 					else
 						break;
 				}
-				var s : String = buf.substr(p1,pos-p1);
+				s = buf.substr(p1,pos-p1);
 				var f : Number = parseFloat(s);
 				if( isNaN(f) )
 					throw ("Flash deserializer Invalid float "+s);
@@ -116,7 +118,7 @@ package swhx {
 				var len : int = readDigits();
 				if( buf.charAt(pos++) != ":" || length - pos < len )
 					throw "Flash deserializer: Invalid string length";
-				var s : String = buf.substr(pos,len);
+				s = buf.substr(pos,len);
 				s = decodeURIComponent(s);
 				pos += len;
 				scache.push(s);
@@ -127,33 +129,36 @@ package swhx {
 				while( true ) {
 					if( pos >= length )
 						throw "Flash deserializer: Invalid array";
-					var c : int = buf.charCodeAt(pos);
+					c = buf.charCodeAt(pos);
 					if( c == 104 ) { /*h*/
 						pos++;
 						break;
 					}
 					if( c == 117 ) { /*u*/
 						pos++;
-						var n : int = readDigits();
-						if( n <= 0 )
-							throw "Flash deserializer: Invalid array null counter";
+						n = readDigits();
 						a[a.length+n-1] = null;
 					} else
 						a.push(deserialize());
 				}
 				return a;
+			case 98: // b
+				var o1:Object = new Object();
+				cache.push(o1);
+				deserializeObject(o1,true);
+				return o1;
 			case 111: // o
-				var o:Object = new Object();
-				cache.push(o);
-				deserializeObject(o);
-				return o;
+				var o2:Object = new Object();
+				cache.push(o2);
+				deserializeObject(o2,false);
+				return o2;
 			case 114: // r
-				var n : uint = readDigits();
+				n = readDigits();
 				if( n >= cache.length )
 					throw "Flash deserializer: Invalid reference";
-				return cache[n];
+				return cache[n2];
 			case 82: // R
-				var n : uint = readDigits();
+				n = readDigits();
 				if( n >= scache.length )
 					throw "Flash deserializer: Invalid string reference";
 				return scache[n];
@@ -165,19 +170,19 @@ package swhx {
 				throw "Flash deserializer: cannot handle enumerations";
 			// deprecated
 			case 115: // s
-				var len = readDigits();
-				if( buf.charAt(pos++) != ":" || length - pos < len )
+				n = readDigits();
+				if( buf.charAt(pos++) != ":" || length - pos < n )
 					throw "Flash deserializer: Invalid string length";
-				var s = buf.substr(pos,len);
-				pos += len;
+				s = buf.substr(pos,n);
+				pos += n;
 				scache.push(s);
 				return s;
 			case 106: // j
-				var len = readDigits();
+				n = readDigits();
 				if( buf.charAt(pos++) != ":" )
 					throw "Flash deserializer: Invalid string length";
-				var s = buf.substr(pos,len);
-				pos += len;
+				s = buf.substr(pos,n);
+				pos += n;
 				s = s.replace(reEscBackslash,delim).replace(reEscReturn,"\r").replace(reEscNewline,"\n").replace(reDelim,"\\");
  				scache.push(s);
 				return s;
