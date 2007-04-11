@@ -52,9 +52,9 @@ package swhx {
 		private var ocache: Array;
 		private var scache: Array;
 
-		static var reBackslash: RegExp = /\\/g;
-		static var reNewline: RegExp = /\n/g;
-		static var reReturn: RegExp = /\r/g;
+		static private var reBackslash: RegExp = /\\/g;
+		static private var reNewline: RegExp = /\n/g;
+		static private var reReturn: RegExp = /\r/g;
 
 		public function Serializer() {
 			buf = "";
@@ -62,11 +62,11 @@ package swhx {
 			scache = new Array();
 		};
 
-		public function dontUseCache() {
+		public function dontUseCache():void {
 			this.ocache = null;
 		};
 
-		public function serialize(value) {
+		public function serialize(value:*):void {
 			// null
 			if (value == null) {
 				this.buf += "n";
@@ -88,7 +88,7 @@ package swhx {
 					this.buf += "m";
 					return;
 				}
-				var str = value.toString();
+				var str:String = value.toString();
 				// Float detection: convert to string and see if there's a dot...
 				if (str.indexOf(".",0) != -1) {
 					// Float
@@ -119,9 +119,9 @@ package swhx {
 					return;
 				}
 				this.buf += "a";
-				var i = 0;
-				var l = value.length;
-				var c = 0;
+				var i:int = 0;
+				var l:int = value.length;
+				var c:int = 0;
 				while (c < l) {
 					if (value[c] != null) {
 						if (i > 0) {
@@ -169,16 +169,16 @@ package swhx {
 			}
 
 			// Function
-			if (value instanceof Function) {
+			if (value is Function) {
 				throw "Flash serializer Cannot serialize function: '"+value+"'\n";
 			}
 
 			// Object
 			if (value is Object) {
 				this.buf += "o";
-				for(var i in value) {
-					this.serializeString(i);
-					this.serialize(value[i]);
+				for(var k:String in value) {
+					this.serializeString(k);
+					this.serialize(value[k]);
 				}
 				this.buf += "g";
 				return;
@@ -188,17 +188,17 @@ package swhx {
 			throw "Flash deserializer Unknown value type";
 		};
 
-		public function serializeException(value) {
+		public function serializeException(value:*):void {
 			this.buf += "x";
 			this.serialize(value);
 		};
 
-		public function serializeRef(value): Boolean {
+		public function serializeRef(value:*): Boolean {
 			if (this.ocache == null) {
 				return (false);
 			}
-			var i = 0;
-			var l = this.ocache.length;
+			var i:int = 0;
+			var l:int = this.ocache.length;
 			while (i < l) {
 				if (this.ocache[i] == value) {
 					this.buf += "r";
@@ -211,10 +211,10 @@ package swhx {
 			return false;
 		};
 
-		public function serializeString(value: String) {
-			var r = null;
-			var l = this.scache.length;
-			for (var i=0; i<l; i++) {
+		public function serializeString(value: String):void {
+			var r:* = null;
+			var l:int = this.scache.length;
+			for (var i:int=0; i<l; i++) {
 				if (this.scache[i] == value) {
 					r = i;
 					break;
@@ -237,7 +237,7 @@ package swhx {
 			return (this.buf.toString());
 		};
 
-		static public function run(value): String {
+		static public function run(value:*): String {
 			var ser: Serializer = new Serializer()
 			ser.serialize(value);
 			return ser.toString();
