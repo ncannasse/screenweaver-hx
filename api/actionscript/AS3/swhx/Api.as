@@ -20,7 +20,7 @@ package swhx {
 	import flash.external.ExternalInterface;
 	
 	public class Api {
-		private static var me = null;
+		private static var me:Api = null;
 		private static var base: Object;
 		private static var desktop: Boolean;
 		private static var reBackslash: RegExp = /\\/g;
@@ -36,19 +36,19 @@ package swhx {
 		}
 				
 		static private function doCall(funpath: String, argstr: String) : String {
-			var err = base.toString();
+			var err:String = base.toString();
 			try {
 				var fun: Object = resolvePath(funpath, base);
 				err+=fun+"|";
 				if (fun) {
-					var args = Deserializer.run(argstr);
+					var args:* = Deserializer.run(argstr);
 					err+=args+"|";
 					return Serializer.run(fun.fun.apply(fun.obj, args));
 				} else {			
 					return "x"+Serializer.run("function '"+funpath+"' failed to resolve");					
 				}
 			}
-			catch( e ) {				
+			catch(e:*) {				
 				err = 	"Api exception on invoking:\n "
 						+funpath+":\nwith arguments:\n"
 						+argstr+"\nerror path:\n"
@@ -62,9 +62,9 @@ package swhx {
 		}		
 		
 		static public function resolvePath(path: String, obj: Object): Object {
-			var steps = path.split(".");
-			var fun = obj;
-			for (var i=0; i<steps.length; i++) {
+			var steps:Array = path.split(".");
+			var fun:Object = obj;
+			for (var i:int=0; i<steps.length; i++) {
 				obj = fun;
 				if (obj.hasOwnProperty(steps[i]))					
 					fun = fun[steps[i]];					
@@ -88,11 +88,11 @@ package swhx {
 				return me = new Api(base);
 		}
 		
-		static public function call(path,... args) : Object {			
+		static public function call(path:String,... args) : Object {			
 			if (desktop) try {		
 				var esc: String = escapeString(Serializer.run(args));
 				return Deserializer.run(ExternalInterface.call(path,esc));
-			} catch(e) {
+			} catch(e:*) {
 				throw("Api exception:\n"+e+"\n"+path+"\n"+esc);
 			}
 			return null;

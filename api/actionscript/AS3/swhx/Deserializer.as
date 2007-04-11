@@ -18,17 +18,17 @@ package swhx {
 
 	public class Deserializer {
 
-		var buf : String;
-		var pos : Number;
-		var length : Number;
-		var cache : Array;
-		var scache : Array;
+		private var buf : String;
+		private var pos : int;
+		private var length : int;
+		private var cache : Array;
+		private var scache : Array;
 
-		static var reEscBackslash: RegExp = /\\\\/g;
-		static var reEscNewline: RegExp = /\\n/g;
-		static var reEscReturn: RegExp = /\\r/g;
-		static var delim: String = "##__delim__##";
-		static var reDelim: RegExp = /##__delim__##/g;
+		static private var reEscBackslash: RegExp = /\\\\/g;
+		static private var reEscNewline: RegExp = /\\n/g;
+		static private var reEscReturn: RegExp = /\\r/g;
+		static private var delim: String = "##__delim__##";
+		static private var reDelim: RegExp = /##__delim__##/g;
 
 		public function Deserializer(buf: String) {
 			this.buf = buf;
@@ -39,12 +39,12 @@ package swhx {
 		}
 
 		private function readDigits(): Number {
-			var k = 0;
-			var s = false;
-			var fpos = pos;
+			var k:int = 0;
+			var s:Boolean = false;
+			var fpos:int = pos;
 			while( true ) {
-				var c = buf.charCodeAt(pos);
-				if( c == null )
+				var c:Number = buf.charCodeAt(pos);
+				if( isNaN(c) )
 					break;
 				if( c == 45 ) { // negative sign
 					if( pos != fpos )
@@ -64,22 +64,22 @@ package swhx {
 			return k;
 		}
 
-		public function deserializeObject(o) {
+		public function deserializeObject(o:*):void {
 			while( true ) {
 				if( pos >= length )
 					throw "Flash deserializer: Invalid object";
 				if( buf.charCodeAt(pos) == 103 ) /*g*/
 					break;
-				var k = deserialize();
+				var k:* = deserialize();
 				if( (typeof k) != "string" )
 					throw "Flash deserializer: Invalid object key";
-				var v = deserialize();
+				var v:* = deserialize();
 				o[k] = v;
 			}
 			pos++;
 		}
 
-		public function deserialize() : Object {
+		public function deserialize() : * {
 			switch( buf.charCodeAt(pos++) ) {
 			case 110: // n
 				return null;
@@ -92,18 +92,18 @@ package swhx {
 			case 105: // i
 				return readDigits();
 			case 100: // d
-				var p1 = pos;
+				var p1 : int = pos;
 				while( true ) {
-					var c = buf.charCodeAt(pos);
+					var c : int = buf.charCodeAt(pos);
 					// + - . , 0-9
 					if( (c >= 43 && c < 58) || c == 101 /*e*/ || c == 69 /*E*/ )
 						pos++;
 					else
 						break;
 				}
-				var s = buf.substr(p1,pos-p1);
-				var f = parseFloat(s);
-				if( f == null )
+				var s : String = buf.substr(p1,pos-p1);
+				var f : Number = parseFloat(s);
+				if( isNaN(f) )
 					throw ("Flash deserializer Invalid float "+s);
 				return f;
 			case 107: // k
@@ -113,28 +113,28 @@ package swhx {
 			case 112: // p
 				return Number.POSITIVE_INFINITY;
 			case 121: // y
-				var len = readDigits();
+				var len : int = readDigits();
 				if( buf.charAt(pos++) != ":" || length - pos < len )
 					throw "Flash deserializer: Invalid string length";
-				var s = buf.substr(pos,len);
+				var s : String = buf.substr(pos,len);
 				s = decodeURIComponent(s);
 				pos += len;
 				scache.push(s);
 				return s;
 			case 97: // a
-				var a = new Array();
+				var a:Array = new Array();
 				cache.push(a);
 				while( true ) {
 					if( pos >= length )
 						throw "Flash deserializer: Invalid array";
-					var c = buf.charCodeAt(pos);
+					var c : int = buf.charCodeAt(pos);
 					if( c == 104 ) { /*h*/
 						pos++;
 						break;
 					}
 					if( c == 117 ) { /*u*/
 						pos++;
-						var n = readDigits();
+						var n : int = readDigits();
 						if( n <= 0 )
 							throw "Flash deserializer: Invalid array null counter";
 						a[a.length+n-1] = null;
@@ -143,18 +143,18 @@ package swhx {
 				}
 				return a;
 			case 111: // o
-				var o = new Object;
+				var o:Object = new Object();
 				cache.push(o);
 				deserializeObject(o);
 				return o;
 			case 114: // r
-				var n = readDigits();
-				if( n < 0 || n >= cache.length )
+				var n : uint = readDigits();
+				if( n >= cache.length )
 					throw "Flash deserializer: Invalid reference";
 				return cache[n];
 			case 82: // R
-				var n = readDigits();
-				if( n < 0 || n >= scache.length )
+				var n : uint = readDigits();
+				if( n >= scache.length )
 					throw "Flash deserializer: Invalid string reference";
 				return scache[n];
 			case 120: // x
