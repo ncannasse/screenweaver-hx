@@ -1,4 +1,4 @@
-/* ************************************************************************ */
+﻿/* ************************************************************************ */
 /*																			*/
 /*  ScreenWeaver HX															*/
 /*  Copyright (c)2006 Edwin van Rijkom, Nicolas Cannasse					*/
@@ -37,7 +37,7 @@ class swhx.Deserializer {
  		var fpos = pos;
  		while( true ) {
  			var c = buf.charCodeAt(pos);
- 			if( c == null )
+ 			if( c == null || isNaN(c) )
  				break;
  			if( c == 45 ) { // negative sign
  				if( pos != fpos )
