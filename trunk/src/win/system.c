@@ -586,10 +586,17 @@ static LRESULT CALLBACK WndProcPH( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				LARGE_INTEGER counter;
 				QueryPerformanceCounter(&counter);
 				// See if Flash's last frame-pulse was longer than a second ago:
+				
+				/* 
+					2007/04/26 : disable that for now, cause "unresponsive UI" bugs as described by Marc Hughes
+				
 				if (counter.QuadPart - w->flash_ph_lastum.QuadPart > hdtimer_frequency.QuadPart)
 					// Sending a timer event with ID 1 seems to revive Flash's frame
 					// pulse. May have side-effects - keep an eye open for it
 					sendEvent(w, msg, 1, 0);
+
+
+				*/
 			}
 			break;
 		default:
