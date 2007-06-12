@@ -40,7 +40,7 @@ class Task {
 			try {
 				var r = m.call();
 				if( m.onResult != null )
-					sync_call(function() { m.onResult(r); });
+					neko.vm.Ui.sync(function() { m.onResult(r); });
 			} catch( e : Dynamic ) {
 				onError(e);
 			}
@@ -51,18 +51,4 @@ class Task {
 		t.sendMessage({ call : call, onResult : onResult });
 	}
 
-	public static function async<T>( call : Void -> T, ?onResult : T -> Void ) {
-		var f = function() {
-			try {
-				var r = call();
-				if( onResult != null )
-					sync_call(function() { onResult(r); });
-			} catch( e : Dynamic ) {
-				onError(e);
-			}
-		};
-		neko.vm.Thread.create(f);
-	}
-
-	static var sync_call = neko.Lib.load("swhx","sync_call",1);
 }

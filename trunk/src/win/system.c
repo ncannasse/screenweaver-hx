@@ -677,6 +677,7 @@ static LRESULT sendEvent( window *w, UINT msg, WPARAM wParam, LPARAM lParam ) {
 void system_window_invalidate( window *w, NPRect *r ) {
 	r->right = min(w->npwin.width,r->right);
 	r->bottom = min(w->npwin.height,r->bottom);
+	// might crash with transparency ??
 	fl_dll->table.setwindow(flashp_get_npp(w->flash),&w->npwin);
 	w->bbuffer_paint(w,r);
 }
@@ -770,6 +771,7 @@ void paintBackBufferTrans( window *w, NPRect *r) {
 		}
 	}
 	pUpdateLayeredWindow(w->hwnd,w->bbuffer_hdc,0,&size,w->bbuffer_hdc,&pos,0,&bf,ULW_ALPHA);
+
 /*
 #ifdef _DEBUG
 	{	// Draw a green rectangle indicating the updated

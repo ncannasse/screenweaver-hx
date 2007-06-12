@@ -27,23 +27,23 @@ package swhx;
 /**
 <p>
 The Application class provides for Screenweaver HX application wide operations.
-The class can not be instantiated because an SWHX application cannot run more than one message loops at a time. 
+The class can not be instantiated because an SWHX application cannot run more than one message loops at a time.
 Once swhx.Application.loop() has been invoked, all further back-end code can only be invoked by means of callbacks.
 </p>
 **/
 
 class Application {
 	static var path: String;
-	
+
 	/**
 	<p>
 	Initializes the shwx.ndll Neko extension.
-		
+
 	Optionally, SWHX will attempt to load the Flash player Netscape plug-in from the path specified.
-	When no path is specified, SWHX will look for the plug-in (version 8 or 9) at /Library/Internet Plug-Ins on OS-X, 
+	When no path is specified, SWHX will look for the plug-in (version 8 or 9) at /Library/Internet Plug-Ins on OS-X,
 	and %PROGRAM_FILES%\Mozilla Firefox\plugins on Windows.
-	A version argument can be passed to indicate that any pre-installed plug-ins found on the system should be by-passed in case they are of lower version than specified. 
-	
+	A version argument can be passed to indicate that any pre-installed plug-ins found on the system should be by-passed in case they are of lower version than specified.
+
 	</p>
 	<p>
 	In case the plug-in is not found in any of the forementioned locations, SWHX will download the plugin from one of the following URLs:
@@ -54,32 +54,32 @@ class Application {
 	</p>
 	<p>
 	Downloading can be disabled by specifying -d NO_SWHX_PLUGIN on compilation of the back-end.
-	</p>	
+	</p>
 	**/
 	public static function init( ?_version: Int, ?_path : String ) {
 		path = _path;
-		#if !NO_SWHX_PLUGIN		
+		#if !NO_SWHX_PLUGIN
 		if( path == null )
 			path = Plugin.find(_version);
 		#end
 		if (path == null)
 			throw("Path to Flash player is not specified");
 		_initialize(untyped path.__s);
-	}	
-		
+	}
+
 	/**
 	Starts the application message loop.
 	This call will not return until all application windows have been closed.
 	**/
 	public static function loop() {
-		_loop();
+		neko.vm.Ui.loop();
 	}
 
 	/**
 	Exit the application message loop. Issuing this call will result in all SWHX windows closing.
 	**/
 	public static function exitLoop() {
-		_loop_exit();
+		neko.vm.Ui.stopLoop();
 	}
 
 	/**
@@ -88,9 +88,7 @@ class Application {
 	public static function cleanup() {
 		_cleanup();
 	}
-		
+
 	static var _initialize = neko.Lib.load("swhx","initialize",1);
-	static var _loop = neko.Lib.load("swhx","loop",0);
-	static var _loop_exit = neko.Lib.load("swhx","loop_exit",0);
-	static var _cleanup = neko.Lib.load("swhx","cleanup",0);	
+	static var _cleanup = neko.Lib.load("swhx","cleanup",0);
 }

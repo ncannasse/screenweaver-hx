@@ -30,24 +30,6 @@
 #	include <string.h>
 #endif
 
-/*
- * Stream syncing is on for Windows: fixes bug reported by Hosey:
- * http://lists.motion-twin.com/pipermail/haxe/2006-November/005795.html
- *
- * Stream syncing is off for Linux until sync calling is implemented in system.c
- */
-#ifndef NEKO_LINUX
-#define STREAM_SYNC
-#endif
-
-#ifdef STREAM_SYNC
-#	define alloc_stream()	((stream*)malloc(sizeof(stream)))
-#	define free_stream(s)	free(s)
-#else
-#	define alloc_stream()	((stream*)alloc_private(sizeof(stream)))
-#	define free_stream(s)
-#endif
-
 #define val_window(x) ((window*)val_data(x))
 #define val_window_msg_hook(x) ((window_msg_hook*)val_data(x))
 #define val_window_msg_cb(x) ((msg_hook_callback)val_data(x))
@@ -101,7 +83,6 @@ static int in_call = 0;
 
 extern void freeNPIds(void);
 
-
 /* ************************************************************************* */
 // APPLICATION
 
@@ -114,16 +95,6 @@ static value initialize( value path ) {
 		val_throw( alloc_string(error) );
 	if( system_init() )
 		neko_error();
-	return val_null;
-}
-
-static value loop() {
-	system_loop();
-	return val_null;
-}
-
-static value loop_exit() {
-	system_loop_exit();
 	return val_null;
 }
 
@@ -147,25 +118,6 @@ static value plugin_file_version( value path ) {
 		return v;
 	}
 	return val_null;
-}
-
-static void on_sync_call( void *k ) {
-	value v = *(value*)k;
-	free_root((value*)k);
-	val_call0(v);
-}
-
-static value sync_call( value f ) {
-	value *k;
-	val_check_function(f,0);
-	k = alloc_root(1);
-	*k = f;
-	system_sync_call(on_sync_call,k);
-	return val_null;
-}
-
-static value is_main_thread() {
-	return alloc_bool(system_is_main_thread());
 }
 
 /* ************************************************************************* */
@@ -308,12 +260,7 @@ SET_WIN_EVENT_HANDLER(restore,0)
 
 static value window_destroy( value w ) {
 	val_check_kind(w,k_window);
-	if( in_call )
-		// Can't directly destroy while being in a callback,
-		// 'post' destroy over message loop instead.
-		system_sync_call((gen_callback)system_window_destroy,val_window(w));
-	else
-		system_window_destroy(val_window(w));
+	system_window_destroy(val_window(w));
 	return val_null;
 }
 
@@ -627,8 +574,7 @@ static void do_free_stream( stream *s ) {
 			fl_dll->table.urlnotify(s->inst,s->stream.url,s->notify?NPRES_DONE:NPRES_NETWORK_ERR,s->stream.notifyData);
 		fl_dll->table.destroystream(s->inst,&s->stream,NPRES_DONE);
 	}
-	free((char*)s->stream.url);
-	free_stream(s);
+	free((char*)s->stream.url);	
 }
 
 static void do_free_stream_sync( void *_r ) {
@@ -639,7 +585,7 @@ static void do_free_stream_sync( void *_r ) {
 
 // called by NP_HOST
 void flashp_url_process( flash *f, const char *url, const char *postData, int postLen, void *notifyData ) {
-	stream *s = alloc_stream();
+	stream *s = (stream*)alloc_private(sizeof(stream));
 	int success;
 	value *root;
 	memset( &s->stream, 0, sizeof( NPStream ) );
@@ -654,7 +600,6 @@ void flashp_url_process( flash *f, const char *url, const char *postData, int po
 		success = 0;
 	if( !success ) {
 		fl_dll->table.urlnotify(s->inst,url,NPRES_NETWORK_ERR,notifyData);
-		free_stream(s);
 		return;
 	}
 	{
@@ -683,53 +628,13 @@ static value stream_close( value vs, value success ) {
 	val_check(success,bool);
 	s = val_stream(vs);
 	s->notify = val_bool(success);
-#	ifdef STREAM_SYNC
-	if( !system_is_main_thread() ) {
-		value *r = alloc_root(1);
-		*r = (value)s;
-		system_sync_call(do_free_stream_sync,r);
-	} else
-		do_free_stream(s);
-#	else
 	do_free_stream(s);
-#	endif
 	val_kind(vs) = NULL;
 	return val_null;
 }
 
-#ifdef STREAM_SYNC
-
-static int stream_data( stream *s, char *buf, int size );
-
-static void stream_data_sync( void *_sb ) {
-	stream_buffer *sb = (stream_buffer*)_sb;
-	int pos = 0;
-	int len = sb->size;
-	while( len > 0 ) {
-		int bytes = stream_data(sb->s, sb->buf + pos, len);
-		pos += bytes;
-		len -= bytes;
-	}
-	free(sb->buf);
-	free(sb);
-}
-
-#endif
-
 static int stream_data( stream *s, char *buf, int size ) {
-	int len;	
-#	ifdef STREAM_SYNC
-	if (!system_is_main_thread()) {
-		stream_buffer *sb = (stream_buffer*)malloc(sizeof(stream_buffer));
-		sb->s = s;
-		sb->buf = (char*)malloc(size);
-		sb->size = size;
-		memcpy(sb->buf,buf,size);
-		system_sync_call(stream_data_sync,sb);
-		return size; // we will make sure that all the buffer is written, see over
-	}	
-#	endif
-	len = fl_dll->table.writeready(s->inst,&s->stream);
+	int len = fl_dll->table.writeready(s->inst,&s->stream);
 	if( len <= 0 )
 		return len;
 	if( len > size )
@@ -763,12 +668,8 @@ static value stream_bytes( value vs, value buf, value pos, value len ) {
 // EXPORTS
 
 DEFINE_PRIM(initialize,1);
-DEFINE_PRIM(loop,0);
-DEFINE_PRIM(loop_exit,0);
 DEFINE_PRIM(cleanup,0);
 DEFINE_PRIM(plugin_file_version,1);
-DEFINE_PRIM(sync_call,1);
-DEFINE_PRIM(is_main_thread,0);
 
 DEFINE_PRIM(window_create,4);
 DEFINE_PRIM(window_show,2);

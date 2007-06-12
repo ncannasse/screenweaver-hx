@@ -6,19 +6,23 @@ function cfo() {
         echo "-- Error on $1"
         exit $?
     else
-        echo "++ Success on $1"    
-    fi    
+        echo "++ Success on $1"
+    fi
 }
 
-if [ -f swhx.zip ]; then 
+if [ -f swhx.zip ]; then
 	rm swhx.zip
 	cfo "removing previous zip package"
 fi
 
-if [ -d swhx ]; then	
+if [ -d swhx ]; then
 	rm -R swhx
 	cfo "removing previous package source tree"
 fi
+
+cd run
+haxe compile.hxml
+cd ..
 
 #root
 mkdir swhx
@@ -91,3 +95,4 @@ cd ..
 #zip it!
 zip -r swhx.zip swhx
 cfo "zipping package swhx.zip"
+rm -rf swhx
