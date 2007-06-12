@@ -22,7 +22,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
  */
- 
+
 package swhx;
 
 /**
@@ -38,34 +38,34 @@ enum StreamHandle {
 class Stream extends neko.io.Output {
 
 	var s : StreamHandle;
-	
+
 	public function new(s) {
 		this.s = s;
 	}
-	
+
 	public override function writeChar(c : Int) {
-		stream_char(s,c);
+		neko.vm.Ui.syncResult(callback(stream_char,s,c));
 	}
 
 	public override function writeBytes(buf : String,pos : Int,len : Int) : Int {
-		return stream_bytes(s,untyped buf.__s,pos,len);
+		return neko.vm.Ui.syncResult(callback(stream_bytes,s,untyped buf.__s,pos,len));
 	}
-	
+
 	public override function prepare( size : Int ) {
-		stream_size(s,size);
+		neko.vm.Ui.syncResult(callback(stream_size,s,size));
 	}
-	
+
 	public function reportError() {
-		stream_close(s,false);
+		neko.vm.Ui.syncResult(callback(stream_close,s,false));
 	}
-	
+
 	public override function close() {
-		stream_close(s,true);
+		neko.vm.Ui.syncResult(callback(stream_close,s,true));
 	}
-	
-	static var stream_size = neko.Lib.load("swhx","stream_size",2);
-	static var stream_char = neko.Lib.load("swhx","stream_char",2);
-	static var stream_bytes = neko.Lib.load("swhx","stream_bytes",4);
-	static var stream_close = neko.Lib.load("swhx","stream_close",2);
+
+	static var stream_size : StreamHandle -> Int -> Void = neko.Lib.load("swhx","stream_size",2);
+	static var stream_char : StreamHandle -> Int -> Void = neko.Lib.load("swhx","stream_char",2);
+	static var stream_bytes : StreamHandle -> String -> Int -> Int -> Int = neko.Lib.load("swhx","stream_bytes",4);
+	static var stream_close : StreamHandle -> Bool -> Void = neko.Lib.load("swhx","stream_close",2);
 
 }
