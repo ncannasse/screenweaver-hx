@@ -84,8 +84,6 @@ extern window_list *windows;
 // MAIN functions
 int system_init();
 void system_cleanup();
-void system_loop();
-void system_loop_exit();
 
 // DLL functions
 library *system_library_open( const char *path );
@@ -114,8 +112,6 @@ int system_window_get_prop( window *w, enum WindowProperty prop );
 msg_hook_list **system_window_get_msg_hook_list( window *w );
 
 // MISC functions
-void system_sync_call( gen_callback func, void *param );
-int system_is_main_thread();
 char *system_fullpath( const char *file );
 char *system_plugin_file_version( const char *file );
 void system_launch_url( const char *url );

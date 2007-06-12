@@ -61,24 +61,15 @@ class Flash {
 	}
 
 	function doCall( ident : String, params : String, ret : String -> Void ) : String {
-		if( !is_main_thread() ) {
-			var l = new neko.vm.Lock();
-			var r = null;
-			var ret = function(result) {
-				r = result;
-				l.release();
-			};
-			var f = callback(doCall,ident,params,ret);
-			sync_call(function() { f(); });
-			l.wait();
+		var me = this;
+		return neko.vm.Ui.syncResult(function() {
+			var r = _flash_call(me.f,untyped ident.__s,untyped params.__s);
+			if( r != null )
+				r = new String(r);
+			if( ret != null )
+				ret(r);
 			return r;
-		}
-		var r = _flash_call(f,untyped ident.__s,untyped params.__s);
-		if( r != null )
-			r = new String(r);
-		if( ret != null )
-			ret(r);
-		return r;
+		});
 	}
 
 	static var save1 : String;
@@ -150,7 +141,7 @@ class Flash {
 				h.onError = function(e) { s.reportError(); }
 				if( postData != null )
 					untyped h.postData = postData;
-				h.asyncRequest(postData != null,s);
+				h.customRequest(postData != null,s);
 				return;
 			}
 			if( postData != null )
@@ -195,7 +186,7 @@ class Flash {
 			f.close();
 			if (!loaded) {
 				loaded = true;
-				sync_call(onSourceLoaded);
+				neko.vm.Ui.sync(onSourceLoaded);
 			}
 		} catch( e : Dynamic ) {
 			s.reportError();
@@ -271,6 +262,4 @@ class Flash {
 	static var _flash_on_call = neko.Lib.load("swhx","flash_on_call",3);
 	static var _flash_call = neko.Lib.load("swhx","flash_call",3);
 
-	static var sync_call = neko.Lib.load("swhx","sync_call",1);
-	static var is_main_thread = neko.Lib.load("swhx","is_main_thread",0);
 }

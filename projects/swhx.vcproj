@@ -43,7 +43,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\bin\win\swhx.ndll ..\api\haxe\ndll\Windows"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -69,6 +70,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
 				AdditionalIncludeDirectories="../include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SWHX_EXPORTS"
 				RuntimeLibrary="0"
@@ -95,7 +97,8 @@
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\bin\win\swhx.ndll ..\api\haxe\ndll\Windows"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool

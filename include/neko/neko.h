@@ -30,12 +30,16 @@
 #	define NEKO_LINUX
 #endif
 
+#if defined(__FreeBSD_kernel__)
+#	define NEKO_GNUKBSD
+#endif
+
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #	define NEKO_BSD
 #endif
 
 // COMPILER/PROCESSOR FLAGS
-#if defined(__GNUC__) 
+#if defined(__GNUC__)
 #	define NEKO_GCC
 #endif
 
@@ -59,12 +63,16 @@
 #	define NEKO_64BITS
 #endif
 
+#if defined(NEKO_LINUX) || defined(NEKO_MAC) || defined(NEKO_BSD) || defined(NEKO_GNUKBSD)
+#	define NEKO_POSIX
+#endif
+
 #include <stddef.h>
 #ifndef NEKO_VCC
 #	include <stdint.h>
 #endif
 
-#define NEKO_VERSION	104
+#define NEKO_VERSION	153
 
 typedef intptr_t int_val;
 
@@ -200,8 +208,14 @@ typedef struct {
 #	define IMPORT
 #endif
 
-#ifdef NEKO_SOURCES
+#if defined(NEKO_SOURCES)
 #	define EXTERN EXPORT
+#elif defined(NEKO_INSTALLER)
+#	define EXTERN
+#	undef EXPORT
+#	undef IMPORT
+#	define EXPORT
+#	define IMPORT
 #else
 #	define EXTERN IMPORT
 #endif
@@ -239,15 +253,21 @@ typedef struct {
 #define DEFINE_PRIM_MULT(func) C_FUNCTION_BEGIN EXPORT void *func##__MULT() { return &func; } C_FUNCTION_END
 #define DEFINE_PRIM(func,nargs) C_FUNCTION_BEGIN EXPORT void *func##__##nargs() { return &func; } C_FUNCTION_END
 #define DEFINE_KIND(name) int_val __kind_##name = 0; vkind name = (vkind)&__kind_##name;
-#define DEFINE_ENTRY_POINT(name) C_FUNCTION_BEGIN void name(); EXPORT void *__neko_entry_point() { return &name; } C_FUNCTION_END
+
+#ifdef NEKO_INSTALLER
+#	define DEFINE_ENTRY_POINT(name)
+#else
+#	define DEFINE_ENTRY_POINT(name) C_FUNCTION_BEGIN void name(); EXPORT void *__neko_entry_point() { return &name; } C_FUNCTION_END
+#endif
 
 #ifdef HEADER_IMPORTS
-#	define DECLARE_PRIM(func,nargs) C_FUNCTION_BEGIN IMPORT void *func##__##nargs(); C_FUNCTION_END
-#	define DECLARE_KIND(name) C_FUNCTION_BEGIN IMPORT extern vkind name; C_FUNCTION_END
+#	define H_EXTERN IMPORT
 #else
-#	define DECLARE_PRIM(func,nargs) C_FUNCTION_BEGIN EXPORT void *func##__##nargs(); C_FUNCTION_END
-#	define DECLARE_KIND(name) C_FUNCTION_BEGIN EXPORT extern vkind name; C_FUNCTION_END
+#	define H_EXTERN EXPORT
 #endif
+
+#define DECLARE_PRIM(func,nargs) C_FUNCTION_BEGIN H_EXTERN void *func##__##nargs(); C_FUNCTION_END
+#define DECLARE_KIND(name) C_FUNCTION_BEGIN H_EXTERN extern vkind name; C_FUNCTION_END
 
 #define alloc_float			neko_alloc_float
 #define alloc_string		neko_alloc_string
@@ -288,8 +308,7 @@ typedef struct {
 #define val_hash			neko_val_hash
 #define k_int32				neko_k_int32
 #define k_hash				neko_k_hash
-#define kind_import			neko_kind_import
-#define kind_export			neko_kind_export
+#define kind_share			neko_kind_share
 
 C_FUNCTION_BEGIN
 
@@ -348,8 +367,7 @@ C_FUNCTION_BEGIN
 	EXTERN void val_rethrow( value v );
 	EXTERN int val_hash( value v );
 
-	EXTERN void kind_export( vkind k, const char *name );
-	EXTERN vkind kind_import( const char *name );
+	EXTERN void kind_share( vkind *k, const char *name );	
 	EXTERN void _neko_failure( value msg, const char *file, int line );
 
 C_FUNCTION_END
