@@ -137,9 +137,9 @@ void system_sync_call( gen_callback func, void *param ) {
 	m->next = NULL;
 	EnterCriticalSection(&main_lock);
 	if( main_queue == NULL )
-		main_head = m;		
+		main_head = m;
 	else
-		main_queue->next = m;		
+		main_queue->next = m;
 	main_queue = m;
 	LeaveCriticalSection(&main_lock);
 	// notice the main thread
@@ -147,7 +147,7 @@ void system_sync_call( gen_callback func, void *param ) {
 }
 
 int system_is_main_thread() {
-	DWORD current = GetCurrentThreadId(); 
+	DWORD current = GetCurrentThreadId();
 	return current == main_thread_id;
 }
 
@@ -246,7 +246,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	} else {
 		if (flags & WF_PLAIN) {
 			style = WS_POPUP | WS_BORDER | WS_SYSMENU;
-			exstyle |= WS_EX_APPWINDOW;			
+			exstyle |= WS_EX_APPWINDOW;
 		} else {
 			style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 		}
@@ -586,10 +586,10 @@ static LRESULT CALLBACK WndProcPH( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				LARGE_INTEGER counter;
 				QueryPerformanceCounter(&counter);
 				// See if Flash's last frame-pulse was longer than a second ago:
-				
-				/* 
+
+				/*
 					2007/04/26 : disable that for now, cause "unresponsive UI" bugs as described by Marc Hughes
-				
+
 				if (counter.QuadPart - w->flash_ph_lastum.QuadPart > hdtimer_frequency.QuadPart)
 					// Sending a timer event with ID 1 seems to revive Flash's frame
 					// pulse. May have side-effects - keep an eye open for it
@@ -864,8 +864,9 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			break;
 
 		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
 		case WM_MBUTTONDOWN:
+			SetCapture(w->hwnd); // allow releaseOutside
+		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
 		case WM_MBUTTONUP:
 		case WM_LBUTTONDBLCLK:

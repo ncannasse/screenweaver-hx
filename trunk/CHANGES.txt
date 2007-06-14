@@ -24,6 +24,7 @@ FEATURE IDEAS:
 	now user new neko "ui" library for synchronization
 	fixed memory bug with OSX bundles
 	added client initialization (:init call)
+	fixed releaseOutside on windows
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)
