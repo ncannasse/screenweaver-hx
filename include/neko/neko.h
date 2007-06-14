@@ -72,7 +72,7 @@
 #	include <stdint.h>
 #endif
 
-#define NEKO_VERSION	153
+#define NEKO_VERSION	160
 
 typedef intptr_t int_val;
 
@@ -296,6 +296,7 @@ typedef struct {
 #define alloc_buffer		neko_alloc_buffer
 #define buffer_append		neko_buffer_append
 #define buffer_append_sub	neko_buffer_append_sub
+#define buffer_append_char	neko_buffer_append_char
 #define buffer_to_string	neko_buffer_to_string
 #define val_buffer			neko_val_buffer
 #define val_compare			neko_val_compare
