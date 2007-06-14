@@ -36,10 +36,10 @@ class Connection extends haxe.remoting.Connection {
 		s.__path.push(field);
 		return s;
 	}
-	
+
 	/**
 	<p>
-	Neko usage (back-end): invoke a function with the specified arguments on the front-end.	
+	Neko usage (back-end): invoke a function with the specified arguments on the front-end.
 	</p>
 	<p>
 	haXe usage (front-end): invoke a function with the specified arguments on the back-end
