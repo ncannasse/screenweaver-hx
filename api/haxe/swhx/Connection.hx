@@ -78,6 +78,7 @@ class Connection extends haxe.remoting.Connection {
 	static function __init__() {
 	#if flash9
 		flash.external.ExternalInterface.addCallback("swhxCall",doCall);
+		flash.external.ExternalInterface.call(":init","");
 	#else flash
 		flash.external.ExternalInterface.addCallback("swhxCall",null,doCall);
 	#end
