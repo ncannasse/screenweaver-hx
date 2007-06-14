@@ -16,9 +16,9 @@
 /* ************************************************************************ */
 #include <windows.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #define WM_MOUSEWHEEL 0x020A
-#define FLASH_PLACEHOLDER_ID "SWFlash_PlaceholderX"
 
 #include "../system.h"
 #include "../flash_dll.h"
@@ -65,7 +65,6 @@ static void updateFlashMetrics(window *, int width, int height);
 static void applyFlashMetrics(window *w);
 static void fullscreen(window *w, bool enter);
 static LRESULT sendEvent( window *w, UINT msg, WPARAM wParam, LPARAM lParam );
-static LARGE_INTEGER hdtimer_frequency = {0,0};
 
 #define CLASS_NAME "SWHXWindow"
 
@@ -83,9 +82,6 @@ typedef struct _queue {
 typedef BOOL WINAPI UpdateLayeredWindowProc(HWND,HDC,POINT *,SIZE *,HDC,POINT *,COLORREF,BLENDFUNCTION *,DWORD);
 static UpdateLayeredWindowProc* pUpdateLayeredWindow = NULL;
 static HMODULE user32 = NULL;
-static DWORD main_thread_id;
-static mqueue *main_queue = NULL, *main_head = NULL;
-static CRITICAL_SECTION main_lock;
 
 int system_init() {
 	WNDCLASSEX wcl;
@@ -105,17 +101,13 @@ int system_init() {
 	wcl.hIconSm			= 0;
 	if( RegisterClassEx(&wcl) == 0 )
 		return -1;
-	main_thread_id = GetCurrentThreadId();
 	// this will create our main message queue
-	PeekMessage(NULL,NULL,0,0,0);
-	QueryPerformanceFrequency(&hdtimer_frequency);
 	user32 = LoadLibrary("user32.dll");
 	if (user32) {
 		pUpdateLayeredWindow = (UpdateLayeredWindowProc*) GetProcAddress(user32,"UpdateLayeredWindow");
 		if (!pUpdateLayeredWindow)
 			FreeLibrary(user32);
 	}
-	InitializeCriticalSection(&main_lock);
 
 	return 0;
 }
@@ -127,28 +119,6 @@ void system_cleanup() {
 		pUpdateLayeredWindow = NULL;
 		user32 = NULL;
 	}
-}
-
-void system_sync_call( gen_callback func, void *param ) {
-	// adds message to the queue
-	mqueue *m = malloc(sizeof(mqueue));
-	m->f = func;
-	m->param = param;
-	m->next = NULL;
-	EnterCriticalSection(&main_lock);
-	if( main_queue == NULL )
-		main_head = m;
-	else
-		main_queue->next = m;
-	main_queue = m;
-	LeaveCriticalSection(&main_lock);
-	// notice the main thread
-	PostThreadMessage(main_thread_id,WM_SYNCCALL,0,0);
-}
-
-int system_is_main_thread() {
-	DWORD current = GetCurrentThreadId();
-	return current == main_thread_id;
 }
 
 char *system_fullpath( const char *file ) {
@@ -195,10 +165,6 @@ struct _window {
 	enum WindowFlags flags;
 	// full screen data:
 	WINDOWINFO fullscreen_org_wi;
-	// place holder data:
-	HWND flash_ph_hwnd;
-	WNDPROC flash_ph_wndproc;
-	LARGE_INTEGER flash_ph_lastum;
 	// back buffer:
 	SetBufferProc *bbuffer_set;
 	PaintBufferProc *bbuffer_paint;
@@ -209,11 +175,11 @@ struct _window {
 	HBITMAP bbufferB_bmp;
 	HDC bbufferB_hdc;
 	DWORD* bbufferB_bits;
-	// window placement
-	WINDOWPLACEMENT *placement_org;
-	int	placement_int;
 	// message hook
 	msg_hook_list *msg_hooks;
+	// save for maximize
+	WINDOWPLACEMENT save_place;
+	int maximized;
 };
 
 static void setBackBufferStd(window *w);
@@ -263,6 +229,8 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	w->hwnd = hwnd;
 	w->hdc = GetWindowDC(hwnd);
 	w->evt = f;
+	w->save_place.length = sizeof(w->save_place);
+	w->maximized = 0;
 
 	npclip.top = 0;
 	npclip.left = 0;
@@ -401,9 +369,6 @@ msg_hook_list **system_window_get_msg_hook_list( window *w ) {
 	return &w->msg_hooks;
 }
 
-static void onFlashStart(window *w);
-static void onFlashStop(window *w);
-
 #define SET(v,flags,toggle) v = toggle ? (v | flags) : (v & ~flags)
 #define IS_SET(v,flags)	(((v) & flags) == flags)
 
@@ -455,7 +420,10 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 			}
 			return;
 		case WP_FLASH_RUNNING:
-			value? onFlashStart(w) : onFlashStop(w);
+			if (!value)
+				w->flags ^= WF_FLASH_RUNNING;
+			else
+				w->flags |= WF_FLASH_RUNNING;
 			return;
 		case WP_DROPTARGET:
 			DragAcceptFiles(w->hwnd,value!=0);
@@ -465,27 +433,27 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 				w->flags |= WF_DROPTARGET;
 			return;
 		case WP_MINIMIZED:
-			if (value && !IsIconic(w->hwnd)) {
-				w->placement_int = 1;
-				SendMessage(w->hwnd,WM_SYSCOMMAND,SC_MINIMIZE,0);
-			} else if (!value && IsIconic(w->hwnd)) {
-				w->placement_int = 1;
-				SendMessage(w->hwnd,WM_SYSCOMMAND,SC_RESTORE,0);
+			if( value ) {
+				if( !IsIconic(w->hwnd) && w->evt(w,WE_MINIMIZE,NULL) )
+					ShowWindow(w->hwnd,SW_MINIMIZE);
+			} else {
+				if( IsIconic(w->hwnd) && w->evt(w,WE_RESTORE,NULL) )
+					ShowWindow(w->hwnd,SW_RESTORE);
 			}
 			break;
 		case WP_MAXIMIZED: {
-			if (!w->placement_org && value) {
-				int s = sizeof(WINDOWPLACEMENT);
-				w->placement_org = malloc(s);
-				w->placement_org->length = s;
-				GetWindowPlacement(w->hwnd,w->placement_org);
-				w->placement_int = 1;
-				SendMessage(w->hwnd,WM_SYSCOMMAND,SC_MAXIMIZE,0);
-			} else if(w->placement_org && !value) {
-				w->placement_int = 1;
-				SetWindowPlacement(w->hwnd,w->placement_org);
-				free(w->placement_org);
-				w->placement_org = 0;
+			if( value ) {
+				if( !w->maximized && w->evt(w,WE_MAXIMIZE,NULL) ) {
+					w->maximized = 1;
+					GetWindowPlacement(w->hwnd,&w->save_place);
+					ShowWindow(w->hwnd,SW_MAXIMIZE);
+				}
+			} else {
+				if( w->maximized ) {
+					w->evt(w,WE_RESTORE,NULL);
+					w->maximized = 0;
+					SetWindowPlacement(w->hwnd,&w->save_place);
+				}
 			}
 			break;
 		}
@@ -525,7 +493,7 @@ int system_window_get_prop( window *w, enum WindowProperty prop ) {
 		case WP_MINIMIZED:
 			return IsIconic(w->hwnd);
 		case WP_MAXIMIZED:
-			return w->placement_org? 1 : 0;
+			return w->maximized;
 	}
 	return 0;
 }
@@ -546,122 +514,7 @@ void system_window_resize( window *w, int o ) {
 	SendMessage(w->hwnd,WM_SYSCOMMAND,SC_SIZE+o,0);
 }
 
-BOOL CALLBACK findFlashPlaceHolderWindow( HWND hwnd, LPARAM lParam ) {
-	char cClassname[255];
-	*((HWND*) lParam) = 0;
-	GetClassName(hwnd,(LPTSTR)&cClassname,255);
-	if (stricmp(FLASH_PLACEHOLDER_ID,cClassname)==0) {
-		window_list * win = windows;
-		while(win) {
-			if (win->w->flash_ph_hwnd == hwnd)
-				return 1;
-			win = win->next;
-		}
-		*((HWND*) lParam) = hwnd;
-		return 0;
-	}
-	return 1;
-}
 
-static LRESULT CALLBACK WndProcPH( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-	// obtain pointer to window instance concerned:
-	window_list *win = windows;
-	window *w = NULL;
-	while(win) {
-		if (win->w->flash_ph_hwnd == hwnd) {
-			w = win->w;
-			break;
-		}
-		win = win->next;
-	}
-	if (!hwnd || !w) return 0;
-
-	// do magic:
-	switch (msg) {
-		case WM_USER+1:
-			QueryPerformanceCounter(&w->flash_ph_lastum);
-			break;
-		case WM_TIMER:
-			if (wparam == 3) {
-				LARGE_INTEGER counter;
-				QueryPerformanceCounter(&counter);
-				// See if Flash's last frame-pulse was longer than a second ago:
-
-				/*
-					2007/04/26 : disable that for now, cause "unresponsive UI" bugs as described by Marc Hughes
-
-				if (counter.QuadPart - w->flash_ph_lastum.QuadPart > hdtimer_frequency.QuadPart)
-					// Sending a timer event with ID 1 seems to revive Flash's frame
-					// pulse. May have side-effects - keep an eye open for it
-					sendEvent(w, msg, 1, 0);
-
-
-				*/
-			}
-			break;
-		default:
-#ifdef _DEBUG
-		{
-			char out[255];
-			sprintf(out,"PH msg: % i [0x%X] %i %i\n", msg, msg, wparam, lparam);
-			//OutputDebugString(out);
-		}
-#endif
-			break;
-	}
-
-	// Forward message to original handler:
-	return CallWindowProc(w->flash_ph_wndproc,hwnd,msg,wparam,lparam);
-}
-
-void onFlashStart( window *w ) {
-	HWND hwnd = NULL;
-	EnumThreadWindows(GetCurrentThreadId(),findFlashPlaceHolderWindow, (LPARAM) &hwnd );
-	if (hwnd) {
-		w->flash_ph_hwnd = hwnd;
-		w->flash_ph_wndproc = getptr(hwnd,GWL_WNDPROC);
-		// subclass the Flash place holder window:
-		setptr(hwnd,GWL_WNDPROC,WndProcPH);
-	}
-}
-
-void onFlashStop( window *w ) {
-	if (w->flash_ph_hwnd) {
-		// un-subclass the place holder window:
-		setptr(w->flash_ph_hwnd,GWL_WNDPROC,w->flash_ph_wndproc);
-		w->flash_ph_wndproc = NULL;
-		w->flash_ph_hwnd = NULL;
-	}
-}
-
-void system_loop() {
-	MSG msg;
-	while( GetMessage(&msg,NULL,0,0) ) {
-		if( msg.message != WM_SYNCCALL && TranslateAccelerator(0, 0, &msg) == 0 ) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-		}
-		while( main_head ) {
-			mqueue m;
-			EnterCriticalSection(&main_lock);
-			if( main_head == NULL ) {
-				LeaveCriticalSection(&main_lock);
-				break;
-			}
-			m = *main_head;
-			free(main_head);
-			main_head = m.next;
-			if( main_head == NULL )
-				main_queue = NULL;
-			LeaveCriticalSection(&main_lock);
-			m.f(m.param);
-		}
-	}
-}
-
-void system_loop_exit() {
-	PostQuitMessage(0);
-}
 
 static LRESULT sendEvent( window *w, UINT msg, WPARAM wParam, LPARAM lParam ) {
 	NPEvent event;
@@ -824,15 +677,15 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			return 1;
 
 		case WM_PAINT: {
-				PAINTSTRUCT ps;
-				BeginPaint(w->hwnd,&ps);
-				BitBlt	( ps.hdc,ps.rcPaint.left,ps.rcPaint.top,ps.rcPaint.right-ps.rcPaint.left,ps.rcPaint.bottom-ps.rcPaint.top //dest
-						, w->bbuffer_hdc, ps.rcPaint.left, ps.rcPaint.top // source
-						, SRCCOPY // rastermode
-						);
-				EndPaint(w->hwnd,&ps);
-				return 1;
-			}
+			PAINTSTRUCT ps;
+			BeginPaint(w->hwnd,&ps);
+			BitBlt	( ps.hdc,ps.rcPaint.left,ps.rcPaint.top,ps.rcPaint.right-ps.rcPaint.left,ps.rcPaint.bottom-ps.rcPaint.top //dest
+					, w->bbuffer_hdc, ps.rcPaint.left, ps.rcPaint.top // source
+					, SRCCOPY // rastermode
+					);
+			EndPaint(w->hwnd,&ps);
+			return 1;
+		}
 
 		case WM_SETCURSOR: {
 			RECT rc = { w->npwin.x, w->npwin.y, w->npwin.width, w->npwin.height };
@@ -859,8 +712,7 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 		case WM_RBUTTONDOWN:
 			if (!w->evt(w,WE_RIGHTCLICK,NULL))
 				return 1;
-			else
-				sendEvent(w,msg,wparam,lparam);
+			sendEvent(w,msg,wparam,lparam);
 			break;
 
 		case WM_LBUTTONDOWN:
@@ -897,40 +749,33 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			break;
 
 		case WM_WINDOWPOSCHANGED: {
-				WINDOWPOS * wp = (WINDOWPOS*) lparam;
-				if (!(wp->flags & SWP_NOSIZE)) {
-					RECT rc;
-					GetClientRect(w->hwnd, &rc);
-					updateFlashMetrics(w, rc.right-rc.left, rc.bottom - rc.top);
-					applyFlashMetrics(w);
-				}
-				return 0;
+			WINDOWPOS * wp = (WINDOWPOS*) lparam;
+			if (!(wp->flags & SWP_NOSIZE)) {
+				RECT rc;
+				GetClientRect(w->hwnd, &rc);
+				updateFlashMetrics(w, rc.right-rc.left, rc.bottom - rc.top);
+				applyFlashMetrics(w);
+			}
+			return 0;
 		}
 
 		case WM_SYSCOMMAND: {
-			int internal = w->placement_int;
-			w->placement_int = 0;
 			switch(wparam & 0xFFF0) {
-				case SC_MAXIMIZE:
-					if (!internal && !w->evt(w,WE_MAXIMIZE,NULL)) return 0;
-					if (!w->placement_org) {
-						w->placement_org = malloc(sizeof(WINDOWPLACEMENT));
-						w->placement_org->length = sizeof(WINDOWPLACEMENT);
-						GetWindowPlacement(w->hwnd, w->placement_org);
-					}
-					break;
-				case SC_MINIMIZE:
-					if (!internal && !w->evt(w,WE_MINIMIZE,NULL))
-						return 0;
-					break;
-				case SC_RESTORE:
-					if (!internal)
-						w->evt(w,WE_RESTORE,NULL);
-					if (w->placement_org) {
-						free(w->placement_org);
-						w->placement_org = 0;
-					}
-					break;
+			case SC_MAXIMIZE:
+				if( !w->evt(w,WE_MAXIMIZE,NULL) )
+					return 0;
+				if( w->maximized )
+					SetWindowPlacement(w->hwnd,&w->save_place);
+				w->maximized = 1;
+				break;
+			case SC_MINIMIZE:
+				if (!w->evt(w,WE_MINIMIZE,NULL))
+					return 0;
+				break;
+			case SC_RESTORE:
+				w->evt(w,WE_RESTORE,NULL);
+				w->maximized = 0;
+				break;
 			}
 			break;
 		}
@@ -970,7 +815,6 @@ static LRESULT CALLBACK WndProcStub( HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 }
 
 static void fullscreen(window *w, bool enter) {
-
 	RECT rc;
 	if (enter) {
 		w->fullscreen_org_wi.cbSize = sizeof(WINDOWINFO);
@@ -979,8 +823,7 @@ static void fullscreen(window *w, bool enter) {
 		GetWindowRect(GetDesktopWindow(), &rc);
 		SetWindowPos( w->hwnd, HWND_TOPMOST, 0, 0, rc.right - rc.left, rc.bottom - rc.top, 0);
 	}
-	else
-	{
+	else {
 		RECT *rc = &w->fullscreen_org_wi.rcWindow;
 		SetWindowLong( w->hwnd, GWL_STYLE, w->fullscreen_org_wi.dwStyle );
 		SetWindowLong( w->hwnd, GWL_EXSTYLE, w->fullscreen_org_wi.dwExStyle );
