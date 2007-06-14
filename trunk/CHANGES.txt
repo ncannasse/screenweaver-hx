@@ -23,6 +23,7 @@ FEATURE IDEAS:
 	fixed int return type in AS2
 	now user new neko "ui" library for synchronization
 	fixed memory bug with OSX bundles
+	added client initialization (:init call)
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)

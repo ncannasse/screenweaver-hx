@@ -33,6 +33,7 @@ class Flash {
 	var f : Void;
 	var server : neko.net.RemotingServer;
 	var loaded: Bool;
+	var initialized : Bool;
 
 	/**
 	<p>
@@ -61,6 +62,8 @@ class Flash {
 	}
 
 	function doCall( ident : String, params : String, ret : String -> Void ) : String {
+		if( !initialized )
+			throw "The SWF is not yet loaded or has not been compiled with swhx.Connection class (or swhx.Api.init has not been called for AS2/AS3 project)";
 		var me = this;
 		return neko.vm.Ui.syncResult(function() {
 			var r = _flash_call(me.f,untyped ident.__s,untyped params.__s);
@@ -80,6 +83,10 @@ class Flash {
 		// initialization
 		if( ident == ":desktop" && params == ":available" )
 			return escape("yes");
+		if( ident == ":init" && params == "" ) {
+			initialized = true;
+			return "";
+		}
 
 		if( ident == ":request1" ) {
 			save1 = params;

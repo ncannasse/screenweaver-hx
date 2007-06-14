@@ -1,4 +1,4 @@
-﻿/* ************************************************************************ */
+/* ************************************************************************ */
 /*																			*/
 /*  ScreenWeaver HX															*/
 /*  Copyright (c)2006 Edwin van Rijkom, Nicolas Cannasse					*/
@@ -20,35 +20,36 @@ import flash.external.ExternalInterface;
 class swhx.Api {
 	private static var me = null;
 	private static var base: Object;
-	
-	private function Api(base: Object) {		
+
+	private function Api(base: Object) {
 		Api.base = base;
-		ExternalInterface.addCallback("swhxCall",null,doCall);		
+		ExternalInterface.addCallback("swhxCall",null,doCall);
+		ExternalInterface.call(":init","");
 	}
-			
+
 	static private function doCall(funpath: String, argstr: String) {
 		var fun: Object = resolvePath(funpath, base);
 		if (fun) {
-			var args = swhx.Deserializer.run(argstr);			
+			var args = swhx.Deserializer.run(argstr);
 			return swhx.Serializer.run(fun.fun.apply(fun.obj, args));
-		} else {			
+		} else {
 			return "x"+swhx.Serializer.run(funpath+": Failed to resolve.");
 		}
-	}		
-	
+	}
+
 	static public function resolvePath(path: String, obj: Object): Object {
 		with (obj) {
 			return { fun: eval(path), obj: obj};
 		}
 	}
-	
-	static public function init(base: Object): Api {		
-		if (me) 
+
+	static public function init(base: Object): Api {
+		if (me)
 			return me;
-		else		
+		else
 			return me = new Api(base);
 	}
-	
+
 	static public function call() {
 		if (ExternalInterface.call(":desktop",":available") != "yes")  {
 			trace("This SWF requires Screenweaver HX to run properly");
@@ -57,9 +58,9 @@ class swhx.Api {
 		var path = arguments.shift();
 		var args = escapeString(swhx.Serializer.run(arguments));
 		var result = ExternalInterface.call(path,args);
-		return swhx.Deserializer.run(result);		
+		return swhx.Deserializer.run(result);
 	}
-	
+
 	static private function escapeString(str: String): String {
 		return str.split("\\").join("\\\\").split("&").join("&amp;");
 	}
