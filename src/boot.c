@@ -120,7 +120,7 @@ char *getSwitch(int argc, char *args[], char *swtch) {
 	return NULL;
 }
 
-char *getSwitchFromBundle(char *swtch) {	
+char *getSwitchFromBundle(char *swtch) {
 #if OSX
 	{
 		CFBundleRef br = CFBundleGetMainBundle();
@@ -191,18 +191,19 @@ char *system_fullpath( const char *file ) {
 }
 #endif
 
-static int boot_main(int argc, char *argv[] ) {	
+static int boot_main(int argc, char *argv[] ) {
 	neko_vm *vm;
 	value args[2];
 	value mload, exc = NULL;
 
 	char* root = getSwitch(argc,argv,"swroot");
 	char* rootFromBundle = root ? NULL : getSwitchFromBundle("swroot");
-	
+
 	char* index = getSwitch(argc,argv,"swindex");
 	if(!index) index = getSwitchFromBundle("swindex");
-	
-#if OSX	
+
+#if OSX
+	char* tmpRootBuffer = NULL;
 	if (rootFromBundle) {
 		if (stricmp("SW_BUNDLE_PARENT",rootFromBundle)==0) {
 			// folder containing bundle is path:
@@ -210,15 +211,21 @@ static int boot_main(int argc, char *argv[] ) {
 			strcat(root,"/..");
 		} else {
 			// path is relative to bundle:
-			char *rel = strdup(rootFromBundle);
-			sprintf(root,"%s/%s",getBundleRoot(),rel);
-			free(rel);
+			root = tmpRootBuffer = malloc(FILENAME_MAX);
+			sprintf(root,"%s/%s",getBundleRoot(),rootFromBundle);
 		}
 	}
 #endif
 
 	// if root folder is specified, change the current directory:
-	if( root ) chdir(root);
+	if( root ) {
+		chdir(root);
+#		if OSX
+ 		if (tmpRootBuffer)
+ 			free(tmpRootBuffer);
+#		endif
+	}
+
 	// printf("boot-loader computed working folder: %s\n",root);
 	// printf("boot-loader set working folder: %s\n",getcwd(NULL));
 
