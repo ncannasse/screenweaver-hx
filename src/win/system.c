@@ -190,7 +190,6 @@ static void paintBackBufferTrans(window *w, NPRect *rc);
 window *system_window_create( const char *title, int width, int height, enum WindowFlags flags, on_event f ) {
 	RECT rc = { 0, 0, width, height };
 	HWND hwnd;
-	NPRect npclip;
 	int style;
 	DWORD exstyle = 0;
 	window *w = malloc(sizeof(struct _window));
@@ -232,11 +231,9 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	w->save_place.length = sizeof(w->save_place);
 	w->maximized = 0;
 
-	npclip.top = 0;
-	npclip.left = 0;
-
 	w->npwin.type = NPWindowTypeDrawable;
-	w->npwin.clipRect = npclip;
+	w->npwin.clipRect.left = 0;
+	w->npwin.clipRect.top = 0;
 	w->npwin.x = 0;
 	w->npwin.y = 0;
 
@@ -247,7 +244,6 @@ window *system_window_create( const char *title, int width, int height, enum Win
 }
 
 static void updateFlashMetrics(window *w, int width, int height) {
-	RECT rc = {0,0,w->npwin.width,w->npwin.height};
 	w->npwin.clipRect.bottom = height;
 	w->npwin.clipRect.right = width;
 	w->npwin.height = height;
@@ -376,7 +372,7 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 	DWORD style = GetWindowLong(w->hwnd,GWL_STYLE);
 	switch( prop ) {
 		case WP_RESIZABLE:
-			if (!(w->flags & WF_PLAIN))
+			if (!(w->flags & (WF_PLAIN | WF_TRANSPARENT)))
 				SET(style,WS_THICKFRAME,value);
 			break;
 		case WP_MAXIMIZE_ICON:
