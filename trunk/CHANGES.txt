@@ -11,13 +11,8 @@ KNOWN ISSUES:
 	Using Adobe Flash player 9, the player's settings dialog doesn't
 	allow changing values on the 'privacy' tab. (Win)
 
-TODO:
-	After using window.maximize, the system menu doesn't track maximized /
-	restore state correctly (Win)
-
-FEATURE IDEAS:
-	allow to render a neko string buffer on the window
-	pop-up menu support
+	Mixing programming and menu access to maximized status doesn't
+	play very well on Windows.
 
 2007-??-?? : 1.0.9
 	fixed int return type in AS2
@@ -25,6 +20,8 @@ FEATURE IDEAS:
 	fixed memory bug with OSX bundles
 	added client initialization (:init call)
 	fixed releaseOutside on windows
+	some fixes for maximized windows
+	some cleanup on win32 (no flash subclassing)
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)
