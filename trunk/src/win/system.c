@@ -209,7 +209,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 		w->bbuffer_set = setBackBufferStd;
 		w->bbuffer_paint = paintBackBufferStd;
 	}
-	hwnd = CreateWindowEx(exstyle, CLASS_NAME,title,style,CW_USEDEFAULT,0,rc.right-rc.left,rc.bottom-rc.top,NULL,NULL,GetModuleHandle(NULL),0);
+	hwnd = CreateWindowEx(exstyle, CLASS_NAME,title,style,CW_USEDEFAULT,CW_USEDEFAULT,rc.right-rc.left,rc.bottom-rc.top,NULL,NULL,GetModuleHandle(NULL),0);
 	if( hwnd == NULL ) {
 		free((void*)w);
 		return NULL;
