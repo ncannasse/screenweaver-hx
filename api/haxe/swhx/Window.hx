@@ -171,7 +171,7 @@ class Window {
 
 	/**
 	Event invoked when the window is minimized from the operating system window chrome.
-	Returning ''false'' from the event handler will minimization.
+	Returning ''false'' will cancel this action.
 	**/
 	public function onMinimize() {
 		return true;
@@ -179,7 +179,7 @@ class Window {
 
 	/**
 	Event invoked when the window is maximized from the operating system window chrome.
-	Returning ''false'' from the event handler will maximization.
+	Returning ''false'' will cancel this action.
 	**/
 	public function onMaximize() {
 		return true;
@@ -198,8 +198,12 @@ class Window {
 		return true;
 	}
 
-	/**Event invoked when the window is restored by the user.**/
+	/**
+	Event invoked when the window is restored by the user.
+	Returning ''false'' will cancel this action.
+	**/
 	public function onRestore() {
+		return true;
 	}
 
 	function getResizable() {

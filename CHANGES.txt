@@ -11,20 +11,19 @@ KNOWN ISSUES:
 	Using Adobe Flash player 9, the player's settings dialog doesn't
 	allow changing values on the 'privacy' tab. (Win)
 
-	Mixing programming and menu access to maximized status doesn't
-	play very well on Windows.
-
-2007-??-?? : 1.0.9
-	fixed int return type in AS2
-	now user new neko "ui" library for synchronization
-	fixed memory bug with OSX bundles
-	added client initialization (:init call)
-	fixed releaseOutside on windows
-	some fixes for maximized windows
-	some cleanup on win32 (no flash subclassing)
-	bugfix with multiple windows
-	delayed destroyWindow (enable return to flash)
-	fixed window.title property (was always null)
+2007-??-?? : 1.1.0
+	all : now user new neko "ui" library for synchronization
+	all : added client initialization (:init call)
+	all : delayed destroyWindow (enable return to flash)
+	all : fixed window.title property (was always null)
+	all : multiple windows crash fixed
+	all : onRestore now returns a bool (impl on win only)
+	as2 : fixed int return type
+	osx : fixed memory bug with bundles
+	win : fixed releaseOutside on windows
+	win : fixes for maximized and minimized windows states
+	win : some cleanup (no flash subclassing)
+	win : window.show also activates the window
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)
