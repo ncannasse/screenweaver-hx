@@ -22,6 +22,7 @@ KNOWN ISSUES:
 	fixed releaseOutside on windows
 	some fixes for maximized windows
 	some cleanup on win32 (no flash subclassing)
+	bugfix with multiple windows
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)

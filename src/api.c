@@ -154,6 +154,7 @@ static int window_on_event( window *w, enum WindowEvent e, void *data ) {
 					free(l);
 					break;
 				}
+				prev = l;
 				l = l->next;
 			}
 			// should never happen, but in case...
