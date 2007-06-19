@@ -71,13 +71,6 @@ static LRESULT sendEvent( window *w, UINT msg, WPARAM wParam, LPARAM lParam );
 #define AC_SRC_ALPHA 0x01
 #define WS_EX_LAYERED 0x00080000
 #define ULW_ALPHA 0x00000002
-#define WM_SYNCCALL		(WM_USER + 0xFD)
-
-typedef struct _queue {
-	gen_callback f;
-	void *param;
-	struct _queue *next;
-} mqueue;
 
 typedef BOOL WINAPI UpdateLayeredWindowProc(HWND,HDC,POINT *,SIZE *,HDC,POINT *,COLORREF,BLENDFUNCTION *,DWORD);
 static UpdateLayeredWindowProc* pUpdateLayeredWindow = NULL;
@@ -177,9 +170,6 @@ struct _window {
 	DWORD* bbufferB_bits;
 	// message hook
 	msg_hook_list *msg_hooks;
-	// save for maximize
-	WINDOWPLACEMENT save_place;
-	int maximized;
 };
 
 static void setBackBufferStd(window *w);
@@ -228,8 +218,6 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	w->hwnd = hwnd;
 	w->hdc = GetWindowDC(hwnd);
 	w->evt = f;
-	w->save_place.length = sizeof(w->save_place);
-	w->maximized = 0;
 
 	w->npwin.type = NPWindowTypeDrawable;
 	w->npwin.clipRect.left = 0;
@@ -334,6 +322,8 @@ static void deleteBackBuffer(window *w) {
 
 void system_window_show( window *w, int show ) {
 	ShowWindow( w->hwnd, show?SW_SHOW:SW_HIDE );
+	if( show )
+		SetForegroundWindow(w->hwnd);
 }
 
 void system_window_destroy( window *w ) {
@@ -372,14 +362,18 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 	DWORD style = GetWindowLong(w->hwnd,GWL_STYLE);
 	switch( prop ) {
 		case WP_RESIZABLE:
-			if (!(w->flags & (WF_PLAIN | WF_TRANSPARENT)))
+			if (!(w->flags & (WF_PLAIN | WF_TRANSPARENT))) {
 				SET(style,WS_THICKFRAME,value);
+				SetWindowLong(w->hwnd,GWL_STYLE,style);
+			}
 			break;
 		case WP_MAXIMIZE_ICON:
 			SET(style,WS_MAXIMIZEBOX ,value);
+			SetWindowLong(w->hwnd,GWL_STYLE,style);
 			break;
 		case WP_MINIMIZE_ICON:
 			SET(style,WS_MINIMIZEBOX ,value);
+			SetWindowLong(w->hwnd,GWL_STYLE,style);
 			break;
 		case WP_WIDTH:
 		case WP_HEIGHT:	{
@@ -391,7 +385,7 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 				rc.bottom = value;
 			AdjustWindowRectEx( &rc, style, FALSE, 0);
 			SetWindowPos(w->hwnd,NULL,0,0,rc.right - rc.left,rc.bottom - rc.top, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
-			return;
+			break;
 		}
 		case WP_TOP:
 		case WP_LEFT: {
@@ -402,7 +396,7 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 			else
 				rc.top = value;
 			SetWindowPos(w->hwnd,NULL,rc.left,rc.top,0,0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER );
-			return;
+			break;
 		}
 		case WP_FULLSCREEN:
 			if( w->flags & WF_FULLSCREEN ) {
@@ -414,20 +408,20 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 				fullscreen(w, 1);
 				w->flags |= WF_FULLSCREEN;
 			}
-			return;
+			break;
 		case WP_FLASH_RUNNING:
 			if (!value)
 				w->flags ^= WF_FLASH_RUNNING;
 			else
 				w->flags |= WF_FLASH_RUNNING;
-			return;
+			break;
 		case WP_DROPTARGET:
 			DragAcceptFiles(w->hwnd,value!=0);
 			if (value)
 				w->flags &= ~WF_DROPTARGET;
 			else
 				w->flags |= WF_DROPTARGET;
-			return;
+			break;
 		case WP_MINIMIZED:
 			if( value ) {
 				if( !IsIconic(w->hwnd) && w->evt(w,WE_MINIMIZE,NULL) )
@@ -439,23 +433,15 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 			break;
 		case WP_MAXIMIZED: {
 			if( value ) {
-				if( !w->maximized && w->evt(w,WE_MAXIMIZE,NULL) ) {
-					w->maximized = 1;
-					GetWindowPlacement(w->hwnd,&w->save_place);
+				if( !IsZoomed(w->hwnd) && w->evt(w,WE_MAXIMIZE,NULL) )
 					ShowWindow(w->hwnd,SW_MAXIMIZE);
-				}
 			} else {
-				if( w->maximized ) {
-					w->evt(w,WE_RESTORE,NULL);
-					w->maximized = 0;
-					SetWindowPlacement(w->hwnd,&w->save_place);
-				}
+				if( IsZoomed(w->hwnd) && w->evt(w,WE_RESTORE,NULL) )
+					ShowWindow(w->hwnd,SW_RESTORE);
 			}
 			break;
 		}
-
 	}
-	SetWindowLong(w->hwnd,GWL_STYLE,style);
 }
 
 int system_window_get_prop( window *w, enum WindowProperty prop ) {
@@ -489,7 +475,7 @@ int system_window_get_prop( window *w, enum WindowProperty prop ) {
 		case WP_MINIMIZED:
 			return IsIconic(w->hwnd);
 		case WP_MAXIMIZED:
-			return w->maximized;
+			return IsZoomed(w->hwnd);
 	}
 	return 0;
 }
@@ -509,8 +495,6 @@ void system_window_drag( window *w ) {
 void system_window_resize( window *w, int o ) {
 	SendMessage(w->hwnd,WM_SYSCOMMAND,SC_SIZE+o,0);
 }
-
-
 
 static LRESULT sendEvent( window *w, UINT msg, WPARAM wParam, LPARAM lParam ) {
 	NPEvent event;
@@ -648,6 +632,7 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if (result) return result;
 	// if the message was unhandled, do our own processing:
 	switch( msg ) {
+
 		case WM_CLOSE:
 			if( !w->evt(w,WE_CLOSE,NULL) )
 				// exit window close
@@ -708,15 +693,23 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 		case WM_RBUTTONDOWN:
 			if (!w->evt(w,WE_RIGHTCLICK,NULL))
 				return 1;
+			SetCapture(w->hwnd);
 			sendEvent(w,msg,wparam,lparam);
 			break;
 
 		case WM_LBUTTONDOWN:
 		case WM_MBUTTONDOWN:
 			SetCapture(w->hwnd); // allow releaseOutside
+			sendEvent(w, msg, wparam, lparam);
+			break;
+
 		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
 		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+			ReleaseCapture();
+			sendEvent(w, msg, wparam, lparam);
+			break;
+
 		case WM_LBUTTONDBLCLK:
 		case WM_RBUTTONDBLCLK:
 		case WM_MOUSEMOVE:
@@ -752,7 +745,7 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 				updateFlashMetrics(w, rc.right-rc.left, rc.bottom - rc.top);
 				applyFlashMetrics(w);
 			}
-			return 0;
+			break;
 		}
 
 		case WM_SYSCOMMAND: {
@@ -760,17 +753,14 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			case SC_MAXIMIZE:
 				if( !w->evt(w,WE_MAXIMIZE,NULL) )
 					return 0;
-				if( w->maximized )
-					SetWindowPlacement(w->hwnd,&w->save_place);
-				w->maximized = 1;
 				break;
 			case SC_MINIMIZE:
 				if (!w->evt(w,WE_MINIMIZE,NULL))
 					return 0;
 				break;
 			case SC_RESTORE:
-				w->evt(w,WE_RESTORE,NULL);
-				w->maximized = 0;
+				if( !w->evt(w,WE_RESTORE,NULL) )
+					return 0;
 				break;
 			}
 			break;
@@ -797,6 +787,7 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			}
 			break;
 		}
+
 		default:
 			break;
 	}
