@@ -114,6 +114,12 @@ class Window {
 		_window_show(w,b);
 	}
 
+	/**Close the window.**/
+	public function close() {
+		if( onClose() )
+			destroy();
+	}
+
 	/**Destroy the window.**/
 	public function destroy() {
 		neko.vm.Ui.sync(callback(_window_destroy,w));
@@ -331,7 +337,8 @@ class Window {
 
 	static var _window_create = neko.Lib.load("swhx","window_create",4);
 	static var _window_show = neko.Lib.load("swhx","window_show",2);
-	static var _window_destroy : (Void) -> Void = neko.Lib.load("swhx","window_destroy",1);
+	static var _window_close : Dynamic -> Void = neko.Lib.load("swhx","window_close",1);
+	static var _window_destroy : Dynamic -> Void = neko.Lib.load("swhx","window_destroy",1);
 	static var _window_set_prop = neko.Lib.load("swhx","window_set_prop",3);
 	static var _window_get_prop = neko.Lib.load("swhx","window_get_prop",2);
 	static var _window_set_title = neko.Lib.load("swhx","window_set_title",2);
