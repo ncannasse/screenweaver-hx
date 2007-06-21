@@ -337,7 +337,6 @@ class Window {
 
 	static var _window_create = neko.Lib.load("swhx","window_create",4);
 	static var _window_show = neko.Lib.load("swhx","window_show",2);
-	static var _window_close : Dynamic -> Void = neko.Lib.load("swhx","window_close",1);
 	static var _window_destroy : Dynamic -> Void = neko.Lib.load("swhx","window_destroy",1);
 	static var _window_set_prop = neko.Lib.load("swhx","window_set_prop",3);
 	static var _window_get_prop = neko.Lib.load("swhx","window_get_prop",2);
