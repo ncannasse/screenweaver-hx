@@ -91,8 +91,14 @@ static bool HasMethod( NPP npp, NPObject *npobj, NPIdentifier methodName ) ;
 
 static void url_process( NPP instance, const char *url, const char *post, int postLen, void *notifyData ) {
 	char *url2 = (char*)url;
-	if( memcmp(url,"http://",7) != 0 && memcmp(url,"https://",8) != 0 && memcmp(url,"file://",7) != 0 )
+	if( memcmp(url,"http://",7) != 0 && memcmp(url,"https://",8) != 0 && memcmp(url,"file://",7) != 0 ) {
+		// remove trailing '?' for flash9
+		int l;
 		url2 = system_fullpath(url);
+		l = strlen(url2)-1;
+		if( l > 0 && url2[l] == '?' )
+			url2[l] = 0;
+	}
 	flashp_url_process((flash*)instance->ndata,url2,post,postLen,notifyData);
 	if( url2 != url )
 		free(url2);
