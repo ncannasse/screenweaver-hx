@@ -725,15 +725,20 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			sendEvent( w, msg, wparam, lparam );
 			break;
 
+		case WM_SYSKEYDOWN:
+		case WM_SYSKEYUP:
+		case WM_SYSCHAR:
+		case WM_SYSDEADCHAR:
+			msg += WM_KEYDOWN - WM_SYSKEYDOWN;
+			// no "SYS" message
+			// this will at least enable to receive keydown/up events
+			// while 'alt' is down. Still, both "alt" and "ctrl" key status
+			// are not working correctly, but copy/cut/past still works this way
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		case WM_CHAR:
 		case WM_DEADCHAR:
-		case WM_SYSKEYUP:
-		case WM_SYSKEYDOWN:
-		case WM_SYSCHAR:
-		case WM_SYSDEADCHAR:
-			if (GetFocus() == w->hwnd)
+			if( GetFocus() == w->hwnd )
 				sendEvent( w, msg, wparam, lparam );
 			break;
 
@@ -788,7 +793,14 @@ static LRESULT WndProc( window *w, UINT msg, WPARAM wparam, LPARAM lparam) {
 			break;
 		}
 
+		case WM_ENTERIDLE:
+		case WM_NCHITTEST:
+		case WM_IME_NOTIFY:
+			// messages generating a lot of log
+			break;
+
 		default:
+			// printf("MSG 0x%X\n",msg);
 			break;
 	}
 	return DefWindowProc( w->hwnd, msg, wparam, lparam );

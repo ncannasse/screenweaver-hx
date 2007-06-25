@@ -1,6 +1,6 @@
 KNOWN ISSUES:
-	Flash doesn't handle CTRL key down - bug in FP windowless mode,
-	use systools.Misc.getKeyState to work around.
+	Flash doesn't handle CTRL and ALT key down - bug in FP
+	windowless mode, use systools.Misc.getKeyState to work around.
 
 	Flash doesn't handle Scroll-wheel events on Mac.
 
@@ -24,6 +24,7 @@ KNOWN ISSUES:
 	win : fixes for maximized and minimized windows states
 	win : some cleanup (no flash subclassing)
 	win : window.show also activates the window
+	win : some fixes for ctrl & alt keys
 
 2007-03-08 : 1.0.8
 	window msg hook fix and extension (Win)
