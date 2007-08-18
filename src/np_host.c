@@ -95,7 +95,7 @@ static void url_process( NPP instance, const char *url, const char *post, int po
 		// remove trailing '?' for flash9
 		int l;
 		url2 = system_fullpath(url);
-		l = strlen(url2)-1;
+		l = (int)strlen(url2)-1;
 		if( l > 0 && url2[l] == '?' )
 			url2[l] = 0;
 	}

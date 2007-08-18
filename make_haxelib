@@ -66,6 +66,8 @@ cfo "creating Tools folder"
 cp -R bin/mac/swhx.app swhx/tools/swhx.app
 cfo "copying Mac Boot loader"
 chmod -R 755 swhx/tools/swhx.app
+cfo "cleanip Mac Boot loader"
+rm -rf swhx/tools/swhx.app/.svn swhx/tools/swhx.app/*/.svn swhx/tools/swhx.app/*/*/.svn
 cfo "updating rights on Mac Boot loader"
 cp bin/win/swhx.exe swhx/tools/swhx.exe
 cfo "copying Windows Boot loader"
@@ -93,6 +95,6 @@ cfo "exporting samples from SVN"
 cd ..
 
 #zip it!
-zip -r swhx.zip swhx
+zip -q -r swhx.zip swhx
 cfo "zipping package swhx.zip"
 rm -rf swhx

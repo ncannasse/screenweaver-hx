@@ -156,7 +156,7 @@ package swhx {
 				n = readDigits();
 				if( n >= cache.length )
 					throw "Flash deserializer: Invalid reference";
-				return cache[n2];
+				return cache[n];
 			case 82: // R
 				n = readDigits();
 				if( n >= scache.length )
