@@ -8,6 +8,7 @@ class Flash {
 	static function drawRectangle( x, y, w, h, c ) {
         // draw a red rectangular shape
         var mc = flash.Lib.current;
+		#if flash9 var mc = mc.graphics; #end
         mc.moveTo(x,y);
         mc.beginFill(c,100);
         mc.lineTo(x+w,y);
