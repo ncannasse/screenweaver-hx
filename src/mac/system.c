@@ -97,68 +97,13 @@ void system_library_close( library *l ) {
 	dlclose( (void*)l );
 }
 
-// -------------------------------------- THREAD -----------------------------------------
-
-#define kEventClassSWHX			0xFFFFAA00
-#define kEventSWHXCallMain		0x0
-
-enum {
-	kEventParamSWHXFunc = 'func',
-	kEventParamSWHXData = 'data',
-};
-
-pthread_t main_thread_id;
-
-void system_sync_call( void func( void * ), void *param ) {
-	EventRef evt;
-	CreateEvent(NULL,kEventClassSWHX,kEventSWHXCallMain,GetCurrentEventTime(),kEventAttributeUserEvent,&evt);
-
-	SetEventParameter(evt,kEventParamSWHXFunc,typeVoidPtr,sizeof(void*),&func);
-	SetEventParameter(evt,kEventParamSWHXData,typeVoidPtr,sizeof(void*),&param);
-
-	PostEventToQueue( GetMainEventQueue(), evt,kEventPriorityStandard);
-	ReleaseEvent(evt);
-}
-
-int system_is_main_thread() {
-	return pthread_equal(main_thread_id,pthread_self());
-}
-
 // -------------------------------------- SYSTEM -----------------------------------------
 
-OSStatus delayedRequestHandler(EventHandlerCallRef inHandlerCallRef,EventRef evt,void * inUserData) {
-
-	void (*func)(void *);
-	void *data;
-	
-	EventType et = GetEventKind(evt);
-
-	switch(et) {
-		case kEventSWHXCallMain:
-			GetEventParameter(evt,kEventParamSWHXFunc,typeVoidPtr,0,sizeof(void*),0,&func);
-			GetEventParameter(evt,kEventParamSWHXData,typeVoidPtr,0,sizeof(void*),0,&data);
-			func(data);
-			break;
-	}
-	return 0;
-}
-
 int system_init() {
-	main_thread_id =  pthread_self();
-	EventTypeSpec ets = {kEventClassSWHX, kEventSWHXCallMain};
-	InstallEventHandler(GetApplicationEventTarget(),NewEventHandlerUPP(delayedRequestHandler),1,&ets,0,0);
 	return 0;
 }
 
 void system_cleanup() {
-}
-
-void system_loop() {
-	RunApplicationEventLoop();
-}
-
-void system_loop_exit() {
-	QuitApplicationEventLoop();
 }
 
 // -------------------------------------- WINDOW -----------------------------------------
