@@ -29,7 +29,7 @@ package swhx {
 		g : object end
 		h : array/list/hash end
 		i : Int
-		j : utf8 escaped string
+		j : (deprecated)
 		k : NaN
 		l : list		(not supported)
 		m : -Inf
@@ -38,14 +38,14 @@ package swhx {
 		p : +Inf
 		q : inthash		(not supported)
 		r : reference
-		s : utf8 string
+		s : (deprecated)
 		t : true
 		u : array nulls
 		v : date		(not supported)
 		w : enum		(not supported)
 		x : exception
-		y : *unused		(not supported)
-		z : zero		(not supported)
+		y : urlencoded string
+		z : zero
 		*/
 
 		private var buf: String;

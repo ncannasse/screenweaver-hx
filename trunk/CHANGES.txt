@@ -10,8 +10,11 @@ KNOWN ISSUES:
 
 	Using Adobe Flash player 9, the player's settings dialog doesn't
 	allow changing values on the 'privacy' tab. (Win)
+	
+	When starting too many concurrent threads (for example
+	a lot http requests from flash), crashes might occur.
 
-2007-??-?? : 1.1.0
+2007-08-18 : 1.1.0
 	all : now user new neko "ui" library for synchronization
 	all : added client initialization (:init call)
 	all : delayed destroyWindow (enable return to flash)
