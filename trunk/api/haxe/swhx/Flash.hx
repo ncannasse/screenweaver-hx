@@ -32,7 +32,6 @@ class Flash {
 
 	var f : Void;
 	var server : neko.net.RemotingServer;
-	var loaded: Bool;
 	var initialized : Bool;
 
 	/**
@@ -58,7 +57,6 @@ class Flash {
 			// if reached, it might be useful to write some thread manager
 			neko.vm.Thread.create(callback(me.onGetURL,new Stream(s),new String(url),if( post == null ) null else new String(post)));
 		});
-		me.loaded = false;
 	}
 
 	function doCall( ident : String, params : String, ret : String -> Void ) : String {
@@ -83,8 +81,9 @@ class Flash {
 		// initialization
 		if( ident == ":desktop" && params == ":available" )
 			return escape("yes");
-		if( ident == ":init" && params == "" ) {
+		if( ident == ":init" ) {
 			initialized = true;
+			onSourceLoaded();
 			return "";
 		}
 
@@ -191,10 +190,6 @@ class Flash {
 			}
 			s.close();
 			f.close();
-			if (!loaded) {
-				loaded = true;
-				neko.vm.Ui.sync(onSourceLoaded);
-			}
 		} catch( e : Dynamic ) {
 			s.reportError();
 		}

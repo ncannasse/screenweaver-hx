@@ -1,5 +1,6 @@
 <project name="swhx" url="http://haxe.org/swhx" license="LGPL">
     <user name="swhx"/>
+    <user name="ncannasse"/>
     <description>Screenweaver haXe enables the creation of Flash interfaced desktop applications using haXe</description>
     <version name="1.1.0">Update (see CHANGES.txt)</version>
 	<depends name="systools"/>
