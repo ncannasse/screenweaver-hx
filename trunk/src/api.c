@@ -57,7 +57,7 @@ struct _private_data {
 	value vwindow;
 };
 
-typedef struct _window_msg_hook {
+struct _window_msg_hook {
 	void *id1;				// message id to listen for
 	void *id2;
 	void *p1;				// params
@@ -67,7 +67,7 @@ typedef struct _window_msg_hook {
 	value fn;				// Neko callback
 };
 
-typedef struct _msg_hook_list {
+struct _msg_hook_list {
 	window_msg_hook *hook;
 	struct _msg_hook_list *next;
 };
