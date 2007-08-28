@@ -83,6 +83,9 @@ class Window {
 	/**Get/Set window maximized state.**/
 	public var maximized(getMaximized,setMaximized) : Bool;
 
+	/**Get/Set window visibility.**/
+	public var visible(getVisible,setVisible) : Bool;
+
 	public static var WF_FULLSCREEN	= 1;
 	public static var WF_TRANSPARENT	= 1 << 1;
 	public static var WF_DROPTARGET	= 1 << 3;
@@ -93,6 +96,7 @@ class Window {
 	public function new( title : String, width : Int, height : Int, ?flags : Int ) {
 		this.title = title;
 		if (flags == null) flags = 0;
+		visible = false;
 		w = _window_create(untyped title.__s,width,height,flags);
 		// late binding of events
 		var me = this;
@@ -109,9 +113,9 @@ class Window {
 		_window_on_restore(w,function() { return me.onRestore(); });
 	}
 
-	/**Show or hide the window.**/
+	/** Show or hide the window [DEPRECATED] uses .visible instead **/
 	public function show( b : Bool ) {
-		_window_show(w,b);
+		visible = b;
 	}
 
 	/**Close the window.**/
@@ -333,6 +337,17 @@ class Window {
 
 	function getHandle() {
 		return _window_get_handle(w);
+	}
+
+	function getVisible() {
+		return visible;
+	}
+
+	function setVisible(b) {
+		if( w != null )
+			_window_show(w,b);
+		visible = b;
+		return b;
 	}
 
 	static var _window_create = neko.Lib.load("swhx","window_create",4);
