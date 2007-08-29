@@ -31,7 +31,7 @@ In the latter case, it is used to connect to back-end code, and vice verse in th
 */
 class Connection extends haxe.remoting.Connection {
 
-	override function __resolve(field) : haxe.remoting.Connection {
+	override public function __resolve(field) : haxe.remoting.Connection {
 		var s = new Connection(__data,__path.copy());
 		s.__path.push(field);
 		return s;
