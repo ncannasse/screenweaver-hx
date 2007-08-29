@@ -2,6 +2,6 @@
     <user name="swhx"/>
     <user name="ncannasse"/>
     <description>Screenweaver haXe enables the creation of Flash interfaced desktop applications using haXe</description>
-    <version name="1.1">Update (see CHANGES.txt)</version>
+    <version name="1.1.1">Update (see CHANGES.txt)</version>
 	<depends name="systools"/>
 </project>
