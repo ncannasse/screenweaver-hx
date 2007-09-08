@@ -165,7 +165,7 @@ class Window {
 	}
 
 	/**Initiate user window dragging.**/
-	function drag() {
+	public function drag() {
 		return _window_drag(w);
 	}
 
