@@ -10,9 +10,14 @@ KNOWN ISSUES:
 
 	Using Adobe Flash player 9, the player's settings dialog doesn't
 	allow changing values on the 'privacy' tab. (Win)
-	
+
 	When starting too many concurrent threads (for example
 	a lot http requests from flash), crashes might occur.
+
+TODO:
+	check that Alt+S triggers altKey=true
+	check that Alt+F4 still works
+	review/cleanup the window message hook API
 
 2007-08-18 : 1.1
 	all : now user new neko "ui" library for synchronization
