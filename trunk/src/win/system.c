@@ -489,6 +489,7 @@ void system_window_set_title( window *w, const char* title ) {
 }
 
 void system_window_drag( window *w ) {
+	ReleaseCapture();
 	SendMessage(w->hwnd,WM_SYSCOMMAND,SC_MOVE+1,0);
 }
 
