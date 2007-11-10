@@ -19,6 +19,12 @@ TODO:
 	check that Alt+F4 still works
 	review/cleanup the window message hook API
 
+2007-10-10 : 1.1.2
+	haXe 1.16 compatibility
+
+2007-08-29 : 1.1.1
+	haxe 1.15 compatibility
+
 2007-08-18 : 1.1
 	all : now user new neko "ui" library for synchronization
 	all : added client initialization (:init call)
