@@ -6,7 +6,7 @@ class Run {
 		var cmd;
 		var dir = neko.Sys.getCwd();
 		neko.Sys.setCwd(ospath("samples/sampler/backend"));
-		cmd = "haxe -D old_serialize -main Sampler -neko ../bin/app.n -lib swhx";
+		cmd = "haxe -main Sampler -neko ../bin/app.n -lib swhx";
 		trace("buidling Sampler application - please hold.");
 		neko.Sys.command(cmd);
 		neko.Sys.setCwd(dir);
