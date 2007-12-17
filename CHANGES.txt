@@ -19,6 +19,9 @@ TODO:
 	check that Alt+F4 still works
 	review/cleanup the window message hook API
 
+2007-??-?? : 1.1.3
+	as3 api bytearray serialization support
+
 2007-10-10 : 1.1.2
 	haXe 1.16 compatibility
 

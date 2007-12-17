@@ -17,6 +17,8 @@
 
 package swhx {
 
+	import flash.utils.ByteArray;
+
 	public class Serializer{
 
 		/* prefixes :
@@ -171,6 +173,27 @@ package swhx {
 			// Function
 			if (value is Function) {
 				throw "Flash serializer Cannot serialize function: '"+value+"'\n";
+			}
+
+			// ByteArray
+			if( value is flash.utils.ByteArray ) {
+				this.buf += "y";
+				var s : String = "";
+				var b : flash.utils.ByteArray = value;
+				var CHARS:Array = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
+				var size : uint = b.length;
+				for(var p:uint=0;p<size;p++) {
+					var c1:uint = b[p];
+					// alphanum
+					if( (c1 >= 48 && c1 <= 57) || (c1 >= 65 && c1 <= 90) || (c1 >= 97 && c1 <= 122) )
+						s += String.fromCharCode(c1);
+					else
+						s += "%"+CHARS[c1>>4]+CHARS[c1&15];
+				}
+				this.buf += s.length;
+				this.buf += ":";
+				this.buf += s;
+				return;
 			}
 
 			// Object
