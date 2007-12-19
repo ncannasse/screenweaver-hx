@@ -40,7 +40,10 @@ class Plugin {
 	public static var OSX_ZIP_PATH = "plugin/Flash Player.plugin";
 
 	public static var SEARCH = {
-		Windows: [ neko.Sys.getEnv("ProgramFiles") + "\\Mozilla Firefox\\plugins\\NPSWF32.dll" ],
+		Windows: [
+			neko.Sys.getEnv("ProgramFiles") + "\\Mozilla Firefox\\plugins\\NPSWF32.dll",
+			neko.Sys.getEnv("SystemRoot") + "\\System32\\Macromed\\Flash\\NPSWF32.dll" ,
+		],
 		Mac : [ "/Library/Internet Plug-Ins/Flash player.plugin" ],
 		Linux: [ "~/.mozilla/plugins/libflashplayer.so", "/usr/lib/nsbrowser/plugins/libflashplayer.so" ]
 	};

@@ -21,6 +21,7 @@ TODO:
 
 2007-??-?? : 1.1.3
 	as3 api bytearray serialization support
+	added new flash plugin search directory on windows
 
 2007-10-10 : 1.1.2
 	haXe 1.16 compatibility
