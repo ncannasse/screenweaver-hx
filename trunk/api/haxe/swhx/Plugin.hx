@@ -88,11 +88,11 @@ class Plugin {
 		try {
 			var url = Reflect.field(URLS,sysname);
 			var data = haxe.Http.request(url);
-			var zip = neko.zip.File.readZip(new neko.io.StringInput(data));
+			var zip = neko.zip.Reader.readZip(new neko.io.StringInput(data));
 			if( sysname == "Windows" ) {
 				for( file in zip ) {
 					if( file.fileName == WIN32_DLL ) {
-						var data = neko.zip.File.unzip(file);
+						var data = neko.zip.Reader.unzip(file);
 						var f = neko.io.File.write(PLAYER,true);
 						f.write(data);
 						f.close();
@@ -112,7 +112,7 @@ class Plugin {
 					neko.FileSystem.createDirectory(name);
 					continue;
 				}
-				var data = neko.zip.File.unzip(file);
+				var data = neko.zip.Reader.unzip(file);
 				var f = neko.io.File.write(name,true);
 				f.write(data);
 				f.close();
