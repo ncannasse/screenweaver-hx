@@ -29,11 +29,19 @@ This class can be used with haXe back-end code (that compiles to Neko byte-code)
 In the latter case, it is used to connect to back-end code, and vice verse in the first case.
 </p>
 */
-class Connection extends haxe.remoting.Connection {
+class Connection implements haxe.remoting.Connection, implements Dynamic<haxe.remoting.Connection> {
 
-	override public function __resolve(field) : haxe.remoting.Connection {
+	var __path : Array<String>;
+	var __data : #if neko Flash #else Void #end;
+
+	function new(data,path) {
+		__data = data;
+		__path = path;
+	}
+
+	public function resolve(name) : haxe.remoting.Connection {
 		var s = new Connection(__data,__path.copy());
-		s.__path.push(field);
+		s.__path.push(name);
 		return s;
 	}
 
@@ -47,57 +55,62 @@ class Connection extends haxe.remoting.Connection {
 	*/
 	override public function call( params : Array<Dynamic> ) : Dynamic {
 	#if flash
-		var p = __path.copy();
-		var f = p.pop();
-		var path = p.join(".");
 		var s = new haxe.Serializer();
 		s.serialize(params);
-		var params = haxe.remoting.Connection.escapeString(s.toString());
-		var s = flash.external.ExternalInterface.call(path+"."+f,params);
+		var params = untyped haxe.remoting.ExternalConnection.escapeString(s.toString());
+		var s = flash.external.ExternalInterface.call(__path.join("."),params);
 		if( s == null )
 			throw "Failed to call Neko method "+__path.join(".");
 		return new haxe.Unserializer(s).unserialize();
-	#else neko
+	#elseif neko
 		var s = new haxe.Serializer();
 		s.serialize(params);
-		var r = __data.doCall(__path.join("."),s.toString(),null);
+		var flash : { private function doCall(path : String, s : String) : String; } = __data;
+		var r = flash.doCall(__path.join("."),s.toString());
 		if( r == null )
 			throw "Failed to call Flash method "+__path.join(".");
 		return new haxe.Unserializer(r).unserialize();
-	#else error
 	#end
+	}
+
+	static function doCall( ctx : haxe.remoting.Context, path : String, params : String ) : String {
+		try {
+			var ret = ctx.call(path.split("."),haxe.Unserializer.run(params));
+			return haxe.Serializer.run(ret);
+		} catch( e : Dynamic ) {
+			var s = new haxe.Serializer();
+			try {
+				s.serializeException(e);
+			} catch( _ : Dynamic ) {
+				s = new haxe.Serializer();
+				s.serializeException(Std.string(e));
+			}
+			return s.toString();
+		}
 	}
 
 #if flash
-	static function doCall( path : String, params : String ) : String {
-		var p = path.split(".");
-		var f = p.pop();
-		return haxe.remoting.Connection.doCall(p.join("."),f,params);
-	}
-
-	static function __init__() {
-	#if flash9
-		flash.external.ExternalInterface.addCallback("swhxCall",doCall);
-	#else flash
-		flash.external.ExternalInterface.addCallback("swhxCall",null,doCall);
-	#end
-		flash.external.ExternalInterface.call(":init","");
-	}
 
 	/**
 	<p>
 	haXe (front-end) only: initialize connection to the back-end
 	</p>
 	*/
-	public static function desktopConnect() {
+	public static function desktopConnect( ?ctx : haxe.remoting.Context ) {
 		if( !flash.external.ExternalInterface.available )
 			throw "External Interface not available";
-		if( flash.external.ExternalInterface.call(":desktop",":available") != "yes" )
+		if( ctx == null ) ctx = new haxe.remoting.ContextAll();
+		#if flash9
+			flash.external.ExternalInterface.addCallback("swhxCall",callback(doCall,ctx));
+		#else
+			flash.external.ExternalInterface.addCallback("swhxCall",null,callback(doCall,ctx));
+		#end
+		if( flash.external.ExternalInterface.call(":connect","") != "ok" )
 			throw "Could not connect to the Desktop";
 		return new Connection(null,[]);
 	}
 
-#else neko
+#elseif neko
 
 	/**
 	<p>
@@ -105,7 +118,7 @@ class Connection extends haxe.remoting.Connection {
 	</p>
 	*/
 	public static function flashConnect( flash : Flash ) {
-		return new Connection(untyped flash,[]);
+		return new Connection(flash,[]);
 	}
 
 #end

@@ -31,8 +31,8 @@ package swhx;
 class Flash {
 
 	var f : Void;
-	var server : neko.net.RemotingServer;
 	var initialized : Bool;
+	var context : haxe.remoting.Context;
 
 	/**
 	<p>
@@ -41,9 +41,9 @@ class Flash {
 	The remoting server argument can be "null" in case no calls will be made from the front-end to the back-end.
 	</p>
 	*/
-	public function new( w : Window, s : neko.net.RemotingServer ) {
+	public function new( w : Window, ?context ) {
 		f = _flash_new(untyped w.w);
-		server = s;
+		this.context = (context == null) ? new haxe.remoting.Context() : context;
 		var me = this;
 		_flash_on_call(f,function(ident,params) {
 			var r = me.onCall(new String(ident),new String(params));
@@ -55,20 +55,25 @@ class Flash {
 		},function(s,url,post) {
 			// there's a maximum number of concurrent threads set by the GC
 			// if reached, it might be useful to write some thread manager
-			neko.vm.Thread.create(callback(me.onGetURL,new Stream(s),new String(url),if( post == null ) null else new String(post)));
+			var s = new Stream(s);
+			neko.vm.Thread.create(function() {
+				try {
+					me.onGetURL(s,new String(url),if( post == null ) null else new String(post));
+				} catch( e : Dynamic ) {
+					s.reportError();
+				}
+			});
 		});
 	}
 
-	function doCall( ident : String, params : String, ret : String -> Void ) : String {
+	function doCall( ident : String, params : String ) : String {
 		if( !initialized )
-			throw "The SWF is not yet loaded or has not been compiled with swhx.Connection class (or swhx.Api.init has not been called for AS2/AS3 project)";
+			throw "The SWF has ot yet connected to the desktop : make sure it calls swhx.Connection.desktopConnect first";
 		var me = this;
 		return neko.vm.Ui.syncResult(function() {
 			var r = _flash_call(me.f,untyped ident.__s,untyped params.__s);
 			if( r != null )
 				r = new String(r);
-			if( ret != null )
-				ret(r);
 			return r;
 		});
 	}
@@ -79,14 +84,13 @@ class Flash {
 
 	function onCall( ident : String, params : String ) : String {
 		// initialization
-		if( ident == ":desktop" && params == ":available" )
-			return escape("yes");
-		if( ident == ":init" ) {
-			initialized = true;
-			onSourceLoaded();
-			return "";
+		if( ident == ":connect" ) {
+			if( !initialized ) {
+				initialized = true;
+				neko.vm.Ui.sync(onConnected);
+			}
+			return escape("ok");
 		}
-
 		if( ident == ":request1" ) {
 			save1 = params;
 			return "";
@@ -107,24 +111,8 @@ class Flash {
 			save1 = null;
 			return onFSCommand(p,params);
 		}
-
-		try {
-			var p = ident.split(".");
-			var fname = p.pop();
-			var o = server.resolvePath(p);
-			var f = Reflect.field(o,fname);
-			if( f == null )
-				throw "Unknown method "+ident;
-			var args = new haxe.Unserializer(params).unserialize();
-			var r = Reflect.callMethod(o,f,args);
-			var s = new haxe.Serializer();
-			s.serialize(r);
-			return escape(s.toString());
-		} catch( e : Dynamic ) {
-			var s = new haxe.Serializer();
-			s.serializeException(e);
-			return escape(s.toString());
-		}
+		var cnx : { private function doCall( ctx : haxe.remoting.Context, path : String, params : String ) : String; } = Connection;
+		return escape(cnx.doCall(context,ident,params));
 	}
 
 	static function escape( r : String ) {
@@ -140,59 +128,55 @@ class Flash {
 	Overrides that do not wish to block data retreival should invoke ''super.onGetURL(...)''.
 	</p>
 	*/
-	public function onGetURL( s : Stream, url : String, postData : String) : Void {
-		try {
-			if( url.substr(0,7) == "http://" ) {
-				var h = new haxe.Http(url);
-				h.onError = function(e) { s.reportError(); }
-				if( postData != null )
-					untyped h.postData = postData;
-				h.customRequest(postData != null,s);
-				return;
-			}
+	public dynamic function onGetURL( s : Stream, url : String, postData : String) : Void {
+		if( url.substr(0,7) == "http://" ) {
+			var h = new haxe.Http(url);
+			h.onError = function(e) { s.reportError(); }
 			if( postData != null )
-				throw "Cannot post without http://";
-			if(	url.substr(0,8) == "file:///") {
-				url = url.substr(8,url.length-8);
-				url = StringTools.urlDecode(url);
-			}
-			var f;
-			var size;
-			try {
-				size = neko.FileSystem.stat(url).size;
-				f = neko.io.File.read(url,true);
-			} catch( e : Dynamic ) {
+				untyped h.postData = postData;
+			h.customRequest(postData != null,s);
+			return;
+		}
+		if( postData != null )
+			throw "Cannot post without http://";
+		if(	url.substr(0,8) == "file:///") {
+			url = url.substr(8,url.length-8);
+			url = StringTools.urlDecode(url);
+		}
+		var f;
+		var size;
+		try {
+			size = neko.FileSystem.stat(url).size;
+			f = neko.io.File.read(url,true);
+		} catch( e : Dynamic ) {
+			s.reportError();
+			return;
+		}
+		s.prepare(size);
+		var bufsize = (1 << 16); // 65K
+		var buf = haxe.io.Bytes.alloc(bufsize);
+		while( size > 0 ) {
+			var bytes = f.readBytes(buf,0,bufsize);
+			if( bytes <= 0 ) {
+				f.close();
 				s.reportError();
 				return;
 			}
-			s.prepare(size);
-			var bufsize = (1 << 16); // 65K
-			var buf = neko.Lib.makeString(bufsize);
-			while( size > 0 ) {
-				var bytes = f.readBytes(buf,0,bufsize);
-				if( bytes <= 0 ) {
+			size -= bytes;
+			var pos = 0;
+			while( bytes > 0 ) {
+				var k = s.writeBytes(buf,pos,bytes);
+				if( k <= 0 ) {
 					f.close();
 					s.reportError();
 					return;
 				}
-				size -= bytes;
-				var pos = 0;
-				while( bytes > 0 ) {
-					var k = s.writeBytes(buf,pos,bytes);
-					if( k <= 0 ) {
-						f.close();
-						s.reportError();
-						return;
-					}
-					pos += k;
-					bytes -= k;
-				}
+				pos += k;
+				bytes -= k;
 			}
-			s.close();
-			f.close();
-		} catch( e : Dynamic ) {
-			s.reportError();
 		}
+		s.close();
+		f.close();
 	}
 
 	/**
@@ -201,7 +185,7 @@ class Flash {
 	Override to add handlers for specific command strings. Overrides are not required to invoke "super.onFSCommand(...)".
 	</p>
 	*/
-	public function onFSCommand( cmd : String, param : String ) : String {
+	public dynamic function onFSCommand( cmd : String, param : String ) : String {
 		throw ("Unknown FSCommand: "+cmd+" arguments: "+param);
 		return null;
 	}
@@ -253,7 +237,7 @@ class Flash {
 	Override this method to do processing that requires the front-end Flash movie to be in a running state, such as calling functions on the front-end using swhx.Connection.
 	</p>
 	*/
-	public function onSourceLoaded(): Void {
+	public dynamic function onConnected(): Void {
 	}
 
 	static var _flash_new = neko.Lib.load("swhx","flash_new",1);

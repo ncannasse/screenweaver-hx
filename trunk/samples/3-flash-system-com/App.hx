@@ -6,7 +6,7 @@ class App {
 		// create the file in text mode
 		var f = neko.io.File.write(file,true);
 		// write the content
-		f.write(content);
+		f.writeString(content);
 		// close the file
 		f.close();
 	}
@@ -19,14 +19,14 @@ class App {
         var window = new swhx.Window("My Application",400,300);
 
 		// create an incoming communication Server
-		var server = new neko.net.RemotingServer();
+		var context = new haxe.remoting.Context();
 
 		// share the App object
-		server.addObject("App",App);
+		context.addObject("backend",App);
 
         // create a flash object inside this window
         // pass the server as parameter
-        var flash = new swhx.Flash(window,server);
+        var flash = new swhx.Flash(window,context);
 
         // set the HTML attributes of this flash object
         flash.setAttribute("src","ui.swf");

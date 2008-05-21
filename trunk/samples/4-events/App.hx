@@ -17,7 +17,7 @@ class App {
 		}
 		// if the user click no, send some dummy content
 		if( systools.Dialogs.confirm("Access","Do you want to send some dummy content instead ?",true) ) {
-			stream.write("some dummy content");
+			stream.writeString("some dummy content");
 			stream.close();
 			return;
 		}
@@ -36,7 +36,7 @@ class App {
         window.onClose = onCloseHandler;
 
         // create a flash object inside this window
-        var flash = new swhx.Flash(window,null);
+        var flash = new swhx.Flash(window);
 
 		// save the default URL handler
 		defaultUrlHandler = flash.onGetURL;

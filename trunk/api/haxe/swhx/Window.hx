@@ -170,12 +170,12 @@ class Window {
 	}
 
 	/**Event invoked on window destruction.**/
-	public function onDestroy() {
+	public dynamic function onDestroy() {
 		Application.exitLoop();
 	}
 
 	/**Event invoked on window closure. Returning ''false'' from the event handler will cancel window closure.**/
-	public function onClose() {
+	public dynamic function onClose() {
 		return true;
 	}
 
@@ -183,7 +183,7 @@ class Window {
 	Event invoked when the window is minimized from the operating system window chrome.
 	Returning ''false'' will cancel this action.
 	**/
-	public function onMinimize() {
+	public dynamic function onMinimize() {
 		return true;
 	}
 
@@ -191,7 +191,7 @@ class Window {
 	Event invoked when the window is maximized from the operating system window chrome.
 	Returning ''false'' will cancel this action.
 	**/
-	public function onMaximize() {
+	public dynamic function onMaximize() {
 		return true;
 	}
 
@@ -199,12 +199,12 @@ class Window {
 	Event invoked when the user right-clicks in the window's client area.
 	Returning ''false'' from the event handler will prevent the event being forwarded to the Flash player.
 	**/
-	public function onRightClick() {
+	public dynamic function onRightClick() {
 		return true;
 	}
 
 	/**Event invoked when the user drops files on the window's client area while Window.dropTarget is enabled.**/
-	public function onFilesDropped( files : Array<String> ) {
+	public dynamic function onFilesDropped( files : Array<String> ) {
 		return true;
 	}
 
@@ -212,7 +212,7 @@ class Window {
 	Event invoked when the window is restored by the user.
 	Returning ''false'' will cancel this action.
 	**/
-	public function onRestore() {
+	public dynamic function onRestore() {
 		return true;
 	}
 

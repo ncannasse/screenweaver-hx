@@ -24,7 +24,8 @@ class swhx.Api {
 	private function Api(base: Object) {
 		Api.base = base;
 		ExternalInterface.addCallback("swhxCall",null,doCall);
-		ExternalInterface.call(":init","");
+		if( ExternalInterface.call(":connect","") != "ok" )
+			trace("This SWF requires Screenweaver HX to run properly");
 	}
 
 	static private function doCall(funpath: String, argstr: String) {
@@ -51,10 +52,6 @@ class swhx.Api {
 	}
 
 	static public function call() {
-		if (ExternalInterface.call(":desktop",":available") != "yes")  {
-			trace("This SWF requires Screenweaver HX to run properly");
-			return;
-		}
 		var path = arguments.shift();
 		var args = escapeString(swhx.Serializer.run(arguments));
 		var result = ExternalInterface.call(path,args);
