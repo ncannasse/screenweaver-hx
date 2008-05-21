@@ -10,7 +10,7 @@ class App {
 			var p = params.split(":");
 			var file = p.shift();
 			var f = neko.io.File.write(file,false);
-			f.write(p.join(":"));
+			f.writeString(p.join(":"));
 			f.close();
 
 		default:
@@ -28,7 +28,7 @@ class App {
         var window = new swhx.Window("My Application",400,300);
 
         // create a flash object inside this window
-        var flash = new swhx.Flash(window,null);
+        var flash = new swhx.Flash(window);
 
         // set the HTML attributes of this flash object
         flash.setAttribute("src","ui.swf");

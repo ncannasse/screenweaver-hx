@@ -8,9 +8,9 @@ class App {
 
 		var width = 200;
 		var height = 200;
-				
-		var server = new neko.net.RemotingServer();
-		server.addObject("backend",App);
+
+		var context = new haxe.remoting.Context();
+		context.addObject("backend",App,true);
 
 		wnd = new swhx.Window
 			( "Transparent Window"
@@ -19,18 +19,18 @@ class App {
 			, swhx.Window.WF_TRANSPARENT
 			);
 
-		flash = new swhx.Flash(wnd,server);
+		flash = new swhx.Flash(wnd,context);
 		flash.setAttribute("id","ui");
 		flash.setAttribute("src","ui.swf");
 		flash.start();
-		wnd.resizable = true;		
-		wnd.show(true);		
-				
+		wnd.resizable = true;
+		wnd.show(true);
+
 		swhx.Application.loop();
 		swhx.Application.cleanup();
 	}
-		
-	static function doClose() {		
+
+	static function doClose() {
 		wnd.destroy();
 	}
 }

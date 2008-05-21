@@ -7,12 +7,12 @@ class Sampler {
 	*/
 	static var app: swhx.Application;
 	static var win: swhx.Window;
-	static var srv: neko.net.RemotingServer;
+	static var ctx: haxe.remoting.Context;
 	static var ui: swhx.Flash;
 	static var cnx: swhx.Connection;
 
 	static var mac: Bool = neko.Sys.systemName()=="Mac";
-	static var sourceLoaded: Bool = false;
+	static var connected: Bool = false;
 	static var uiReady: Bool = false;
 
 	/*
@@ -41,13 +41,13 @@ class Sampler {
 
 		s = new Array();
 		win = new swhx.Window("Screenweaver HX Sampler",p.winWidth,p.winHeight);
-		srv = new neko.net.RemotingServer();
-		srv.addObject("sampler",Sampler);
+		ctx = new haxe.remoting.Context();
+		ctx.addObject("sampler",Sampler);
 
-		ui = new swhx.Flash(win,srv);
+		ui = new swhx.Flash(win,ctx);
 		ui.setAttribute("id","ui");
 		ui.setAttribute("src","sampler.swf");
-		ui.onSourceLoaded = onSourceLoaded;
+		ui.onConnected = onConnected;
 		ui.start();
 
 		win.resizable = true;
@@ -67,8 +67,8 @@ class Sampler {
 	/**
 	* Invoked by SWHX after prim. source file hase been loaded
 	*/
-	static function onSourceLoaded() {
-		sourceLoaded = true;
+	static function onConnected() {
+		connected = true;
 		cnx = swhx.Connection.flashConnect(ui);
 		start();
 	}
@@ -82,7 +82,7 @@ class Sampler {
 	}
 
 	static public function start() {
-		if (!(uiReady && sourceLoaded))
+		if (!(uiReady && connected))
 			return;
 		var path = "../../";
 		var folders = neko.FileSystem.readDirectory(path);

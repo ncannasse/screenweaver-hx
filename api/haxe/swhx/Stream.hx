@@ -35,7 +35,7 @@ enum StreamHandle {
 	A stream is bound to the Flash Player in order to deliver asynchronous data such
 	as file downloads.
 **/
-class Stream extends neko.io.Output {
+class Stream extends haxe.io.Output {
 
 	var s : StreamHandle;
 
@@ -43,12 +43,12 @@ class Stream extends neko.io.Output {
 		this.s = s;
 	}
 
-	public override function writeChar(c : Int) {
+	public override function writeByte(c : Int) {
 		neko.vm.Ui.syncResult(callback(stream_char,s,c));
 	}
 
-	public override function writeBytes(buf : String,pos : Int,len : Int) : Int {
-		return neko.vm.Ui.syncResult(callback(stream_bytes,s,untyped buf.__s,pos,len));
+	public override function writeBytes(buf : haxe.io.Bytes,pos : Int,len : Int) : Int {
+		return neko.vm.Ui.syncResult(callback(stream_bytes,s,buf.getData(),pos,len));
 	}
 
 	public override function prepare( size : Int ) {
@@ -65,7 +65,7 @@ class Stream extends neko.io.Output {
 
 	static var stream_size : StreamHandle -> Int -> Void = neko.Lib.load("swhx","stream_size",2);
 	static var stream_char : StreamHandle -> Int -> Void = neko.Lib.load("swhx","stream_char",2);
-	static var stream_bytes : StreamHandle -> String -> Int -> Int -> Int = neko.Lib.load("swhx","stream_bytes",4);
+	static var stream_bytes : StreamHandle -> Dynamic -> Int -> Int -> Int = neko.Lib.load("swhx","stream_bytes",4);
 	static var stream_close : StreamHandle -> Bool -> Void = neko.Lib.load("swhx","stream_close",2);
 
 }

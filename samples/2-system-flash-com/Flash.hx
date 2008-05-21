@@ -1,10 +1,6 @@
 
 class Flash {
 
-	// compile swhx.Connection in order to be able
-	// to get incoming communications
-	static var enabledCom = swhx.Connection;
-
 	static function drawRectangle( x, y, w, h, c ) {
         // draw a red rectangular shape
         var mc = flash.Lib.current;
@@ -18,6 +14,7 @@ class Flash {
 	}
 
     static function main() {
+		swhx.Connection.desktopConnect();
 		drawRectangle(10,10,100,100,0xFF0000);
     }
 }

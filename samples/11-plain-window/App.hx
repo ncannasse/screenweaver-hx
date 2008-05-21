@@ -8,9 +8,9 @@ class App {
 
 		var width = 438;
 		var height = 460;
-				
-		var server = new neko.net.RemotingServer();
-		server.addObject("backend",App);
+
+		var context = new haxe.remoting.Context();
+		context.addObject("backend",App,true);
 
 		wnd = new swhx.Window
 			( "Plain Window"
@@ -19,25 +19,25 @@ class App {
 			, swhx.Window.WF_PLAIN
 			);
 
-		flash = new swhx.Flash(wnd,server);
+		flash = new swhx.Flash(wnd,context);
 		flash.setAttribute("id","ui");
 		flash.setAttribute("src","ui.swf");
 		flash.start();
-		wnd.resizable = true;		
-		wnd.show(true);		
-				
+		wnd.resizable = true;
+		wnd.show(true);
+
 		swhx.Application.loop();
 		swhx.Application.cleanup();
 	}
-	
-	static function doMinimize() {		
+
+	static function doMinimize() {
 		wnd.minimized = true;
 	}
-	
-	static function doMaximize() {		
+
+	static function doMaximize() {
 		wnd.maximized = !wnd.maximized;
 	}
-	
+
 	static function doClose() {
 		trace("Destroying window");
 		wnd.destroy();

@@ -88,7 +88,7 @@ class Plugin {
 		try {
 			var url = Reflect.field(URLS,sysname);
 			var data = haxe.Http.request(url);
-			var zip = neko.zip.Reader.readZip(new neko.io.StringInput(data));
+			var zip = neko.zip.Reader.readZip(new haxe.io.StringInput(data));
 			if( sysname == "Windows" ) {
 				for( file in zip ) {
 					if( file.fileName == WIN32_DLL ) {

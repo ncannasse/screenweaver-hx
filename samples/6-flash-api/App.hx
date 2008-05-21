@@ -13,21 +13,21 @@ class App {
 
 		var width = 550;
 		var height = 400;
-		
-		// server		
-		var server = new neko.net.RemotingServer();
-		server.addObject("backend",App);
+
+		// context
+		var context = new haxe.remoting.Context();
+		context.addObject("backend",App);
 
 		// window
-		wnd = new swhx.Window("Hello World !",width,height);		
-		wnd.onMinimize = function () { 
-			trace("window is minimizing"); 
+		wnd = new swhx.Window("Hello World !",width,height);
+		wnd.onMinimize = function () {
+			trace("window is minimizing");
 			return true; // return false to block minimize;
-		};		
-		wnd.onMaximize = function () { 
-			trace("window is maximizing"); 
+		};
+		wnd.onMaximize = function () {
+			trace("window is maximizing");
 			return true; // return false to block maximize;
-		};		
+		};
 		wnd.onRightClick = function() {
 			trace("Supressing right-click menu by returning false on event");
 			return false;
@@ -36,19 +36,19 @@ class App {
 		wnd.show(true);
 
 		// flash
-		flash = new swhx.Flash(wnd,server);
+		flash = new swhx.Flash(wnd,context);
 		flash.setAttribute("id","ui");
-		flash.setAttribute("src","ui.swf");		
-		flash.onSourceLoaded = onSourceLoaded;
+		flash.setAttribute("src","ui.swf");
+		flash.onConnected = onConnected;
 		flash.start();
-						
+
 		// message loop:
 		swhx.Application.loop();
 		swhx.Application.cleanup();
 	}
-	
-	static function onSourceLoaded() {		
-		trace("on source loaded");
+
+	static function onConnected() {
+		trace("on connected");
 		// connection
 		cnx = swhx.Connection.flashConnect(flash);
 		// use swhx.Connection to call a method in the GUI:

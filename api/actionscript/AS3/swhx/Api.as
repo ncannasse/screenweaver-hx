@@ -29,7 +29,7 @@ package swhx {
 			Api.base = base;
 			if (ExternalInterface.available) {
 				ExternalInterface.addCallback("swhxCall",doCall);
-				ExternalInterface.call(":init","");
+				desktop = (ExternalInterface.call(":connect","") == "ok");
 			}
 		}
 
@@ -77,13 +77,6 @@ package swhx {
 		}
 
 		static public function init(base: Object): Api {
-			desktop = false;
-			if (ExternalInterface.available)
-				if (ExternalInterface.call(":desktop",":available") == "yes")
-					desktop = true;
-
-			if (!desktop) trace("This SWF requires Screenweaver HX to run properly");
-
 			if (me)
 				return me;
 			else

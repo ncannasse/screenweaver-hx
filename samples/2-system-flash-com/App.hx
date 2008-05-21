@@ -2,7 +2,7 @@ class App {
 
 	static var window: swhx.Window;
 	static var flash: swhx.Flash;
-	
+
     static function main() {
         // initialize ScreenWeaver HX
         swhx.Application.init();
@@ -11,27 +11,25 @@ class App {
 		window = new swhx.Window("My Application",400,300);
 
         // create a flash object inside this window
-        flash = new swhx.Flash(window,null);
+        flash = new swhx.Flash(window);
 
         // set the HTML attributes of this flash object
         flash.setAttribute("src","ui.swf");
-		
+
 		// set the callback to be invoked on movie load completion
-		flash.onSourceLoaded = onSourceLoaded;
+		flash.onConnected = onConnected;
 
         // activate the Flash object
         flash.start();
-		
+
 		// enter the system event loop (will exit when window is closed)
         swhx.Application.loop();
 
         // cleanup SWHX properly
         swhx.Application.cleanup();
 	}
-	
-	static function onSourceLoaded() {
-        trace("source loaded!");
-		
+
+	static function onConnected() {
 		// display the window
         window.show(true);
 
@@ -46,6 +44,6 @@ class App {
 			var h = Std.random(100);
 			var c = Std.random(0x1000000);
 			cnx.Flash.drawRectangle.call([x,y,w,h,c]);
-		}        
+		}
     }
 }
