@@ -130,7 +130,7 @@ struct _window {
 	GWorldPtr gw_b;
 	CGContextRef ctx_b;
 	unsigned char* bits_b;
-	
+
 	msg_hook_list *msg_hooks;
 };
 
@@ -189,8 +189,10 @@ window *system_window_create( const char *title, int width, int height, enum Win
 	w->npwin.type = NPWindowTypeDrawable;
 
 	updateFlashMetrics(w, width, height);
-	if (w->flags & WF_TRANSPARENT)
+	if (w->flags & WF_TRANSPARENT) {
 		reallocateOffscreenBuffer(w);
+		SetWindowActivationScope(ref, kWindowActivationScopeAll);
+	}
 	SetWindowTitleWithCFString (ref, cftitle);
 
 	setupHandlers(w);
@@ -203,7 +205,7 @@ window *system_window_create( const char *title, int width, int height, enum Win
 		, w
 		, &w->timer
 		);
-	
+
 	return w;
 }
 
@@ -227,6 +229,8 @@ void system_window_show( window *w, int show ) {
 	if (show) {
 		ShowWindow(w->ref);
 		ActivateWindow(w->ref,true);
+		if( w->flags & WF_TRANSPARENT && !(w->flags & WF_ALWAYS_ONTOP) )
+			SetWindowGroup(w->ref, GetWindowGroupOfClass(kDocumentWindowClass));
 	}
 	else
 		HideWindow(w->ref);
@@ -322,11 +326,17 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 		case WP_TOP:
 		case WP_LEFT: {
 			Rect rc;
+			int offset;
 			GetWindowBounds(w->ref,kWindowStructureRgn,&rc);
-			if ( prop==WP_TOP )
+			if ( prop==WP_TOP ) {
+				offset = value - rc.top;
 				rc.top = value;
-			else
+				rc.bottom += offset;
+			} else {
+				offset = value - rc.left;
 				rc.left = value;
+				rc.right += offset;
+			}
 			SetWindowBounds(w->ref,kWindowStructureRgn,&rc);
 			break;
 		}
@@ -523,13 +533,13 @@ void setupHandlers(window *w) {
 
 	InstallReceiveHandler(NewDragReceiveHandlerUPP(onDragReceive),w->ref,w);
 	InstallTrackingHandler(NewDragTrackingHandlerUPP(onDragTracking),w->ref,w);
-	
+
 	// TODO: handle the standard AppleEvents,
-	// (making this opaque over platforms will be a pickle)	
-	//AEInstallEventHandler(kCoreEventClass,kAEOpenApplication,NewAEEventHandlerUPP(OpenApplicationAE),0,false);    
-	//AEInstallEventHandler(kCoreEventClass,kAEReopenApplication,NewAEEventHandlerUPP(ReopenApplicationAE),0,false);         
-    //AEInstallEventHandler(kCoreEventClass,kAEOpenDocuments,NewAEEventHandlerUPP(aeOpenDocuments),0,false); 
-    
+	// (making this opaque over platforms will be a pickle)
+	//AEInstallEventHandler(kCoreEventClass,kAEOpenApplication,NewAEEventHandlerUPP(OpenApplicationAE),0,false);
+	//AEInstallEventHandler(kCoreEventClass,kAEReopenApplication,NewAEEventHandlerUPP(ReopenApplicationAE),0,false);
+    //AEInstallEventHandler(kCoreEventClass,kAEOpenDocuments,NewAEEventHandlerUPP(aeOpenDocuments),0,false);
+
 }
 
 static OSStatus onClose(EventHandlerCallRef nextHandler, EventRef theEvent, void* u) {
@@ -770,16 +780,16 @@ static OSErr aeOpenDocuments(const AppleEvent *theAppleEvent, AppleEvent *reply,
     long        count = 0;
     OSErr       err = AEGetParamDesc(theAppleEvent,keyDirectObject, typeAEList, &docList);
     require_noerr(err, CantGetDocList);
- 
+
     err = AECountItems(&docList, &count);
     require_noerr(err, CantGetCount);
- 
+
     for(index = 1; index <= count; index++) {
         err = AEGetNthPtr(&docList,index,typeFSRef,NULL,NULL,&theFSRef,sizeof(FSRef),NULL);
-		require_noerr(err, CantGetDocDescPtr);         
+		require_noerr(err, CantGetDocDescPtr);
     }
     AEDisposeDesc(&docList);
- 
+
 CantGetDocList:
 CantGetCount:
 CantGetDocDescPtr:
