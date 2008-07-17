@@ -53,7 +53,7 @@ class Application {
 	http://fpdownload.macromedia.com/get/flashplayer/xpi/current/flashplayer-mac.xpi
 	</p>
 	<p>
-	Downloading can be disabled by specifying -d NO_SWHX_PLUGIN on compilation of the back-end.
+	Downloading can be disabled by specifying -D NO_SWHX_PLUGIN on compilation of the back-end.
 	</p>
 	**/
 	public static function init( ?_version: Int, ?_path : String ) {
