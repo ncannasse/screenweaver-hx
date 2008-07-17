@@ -20,10 +20,11 @@ TODO:
 	fix window.resize() in sample 11
 
 2008-??-?? : 1.2.0
-	haxe 2 changes
+	haxe 2.0 changes
 	neko.net.RemotingServer is now haxe.remoting.Context
 	replaced onSourceLoaded by onConnected
 	it is necessary to call desktopConnect or swhx.Api.init
+	  to trigger onConnected on desktop side
 
 2008-02-25 : 1.1.3
 	as3 api bytearray serialization support
