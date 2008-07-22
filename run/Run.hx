@@ -1,6 +1,7 @@
 class Run {
 
 	static var windows = neko.Sys.systemName()=="Windows";
+	static var linux = neko.Sys.systemName()=="Linux";
 
 	public static function main() {
 		var cmd;
@@ -12,8 +13,10 @@ class Run {
 		neko.Sys.setCwd(dir);
 		var sampler = ospath("samples/sampler/bin");
 		neko.Sys.setCwd(sampler);
-		if (windows)
+		if( windows )
 			cmd = "start ..\\..\\..\\tools\\SWHX.exe -swroot ";
+		else if( linux )
+			cmd = "../../../tools/swhx -swroot ";
 		else {
 			neko.Sys.command("chmod -R 755 ../../../tools/SWHX.app");
 			// Uncomment to reset preferences:

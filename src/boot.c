@@ -107,6 +107,14 @@ char* getBundleRoot(){
 	return 0;
 };
 
+#elif LINUX
+
+#define stricmp strcasecmp
+#include <stdio.h>
+int main (int argc, char ** argv) {
+	return boot_main(argc, argv);
+}
+
 #endif
 
 char *getSwitch(int argc, char *args[], char *swtch) {
@@ -178,6 +186,8 @@ static void report( neko_vm *vm, value exc ) {
 #elif OSX
 	message = CFStringCreateWithCString(NULL,val_string(buffer_to_string(b)), kCFStringEncodingUTF8);
 	CFUserNotificationDisplayNotice(0,0,NULL,NULL,NULL,title,message,NULL);
+#elif LINUX
+	fprintf(stderr,"Uncaught Exception: %s\n",val_string(buffer_to_string(b)));
 #endif
 }
 

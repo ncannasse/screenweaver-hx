@@ -59,6 +59,10 @@ mkdir swhx/ndll/Mac
 cfo "creating NDLL Mac folder"
 cp bin/mac/swhx.ndll swhx/ndll/Mac/swhx.ndll
 cfo "copying SWHX.ndll for Mac"
+mkdir swhx/ndll/Linux
+cfo "creating NDLL Linux folder"
+cp bin/linux/swhx.ndll swhx/ndll/Linux/swhx.ndll
+cfo "copying SWHX.ndll for Linux"
 
 #tools
 mkdir swhx/tools
@@ -71,6 +75,8 @@ rm -rf swhx/tools/swhx.app/.svn swhx/tools/swhx.app/*/.svn swhx/tools/swhx.app/*
 cfo "updating rights on Mac Boot loader"
 cp bin/win/swhx.exe swhx/tools/swhx.exe
 cfo "copying Windows Boot loader"
+cp bin/linux/swhx swhx/tools/swhx
+cfo "copying Linux Boot loader"
 cp TOOLS.README.txt swhx/tools/README.txt
 cfo "copying TOOLS.README.txt"
 
