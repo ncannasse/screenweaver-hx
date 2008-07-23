@@ -53,7 +53,7 @@ class Connection implements haxe.remoting.Connection, implements Dynamic<haxe.re
 	haXe usage (front-end): invoke a function with the specified arguments on the back-end
 	</p>
 	*/
-	override public function call( params : Array<Dynamic> ) : Dynamic {
+	public function call( params : Array<Dynamic> ) : Dynamic {
 	#if flash
 		var s = new haxe.Serializer();
 		s.serialize(params);
