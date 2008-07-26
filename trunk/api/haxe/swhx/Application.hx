@@ -61,6 +61,10 @@ class Application {
 		#if !NO_SWHX_PLUGIN
 		if( path == null )
 			path = Plugin.find(_version);
+		if( path == null ) {
+			Plugin.update();
+			path = Plugin.find(_version);
+		}
 		#end
 		if (path == null)
 			throw("Path to Flash player is not specified");
