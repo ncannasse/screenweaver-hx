@@ -81,9 +81,7 @@ class Plugin {
 			}
 		}
 
-		// try to download a player:
-		update();
-		return path;
+		return null; // player not found
 	}
 
 	public static function update() {
