@@ -19,7 +19,7 @@ TODO:
 	fix window.drag() in sample 10
 	fix window.resize() in sample 11
 
-2008-??-?? : 1.2.0
+2008-07-28 : 1.2.0
 	haxe 2.0 changes
 	neko.net.RemotingServer is now haxe.remoting.Context
 	replaced onSourceLoaded by onConnected
