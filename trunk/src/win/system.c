@@ -402,7 +402,7 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 			if( w->flags & WF_FULLSCREEN ) {
 				if( !value ) {
 					fullscreen(w, 0);
-					w->flags ^= WF_FULLSCREEN;
+					w->flags &= ~WF_FULLSCREEN;
 				}
 			} else if( value ) {
 				fullscreen(w, 1);
@@ -411,9 +411,11 @@ void system_window_set_prop( window *w, enum WindowProperty prop, int value ) {
 			break;
 		case WP_FLASH_RUNNING:
 			if (!value)
-				w->flags ^= WF_FLASH_RUNNING;
-			else
-				w->flags |= WF_FLASH_RUNNING;
+				w->flags &= ~WF_FLASH_RUNNING;
+			else {
+				w->flags |= WF_FLASH_RUNNING;				
+				applyFlashMetrics(w);
+			}
 			break;
 		case WP_DROPTARGET:
 			DragAcceptFiles(w->hwnd,value!=0);
