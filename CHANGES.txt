@@ -19,6 +19,9 @@ TODO:
 	fix window.drag() in sample 10
 	fix window.resize() in sample 11
 
+2008-??-?? : 1.2.1
+	bugfix for flash player 10 (white screen unless window resized)
+
 2008-07-28 : 1.2.0
 	haxe 2.0 changes
 	neko.net.RemotingServer is now haxe.remoting.Context
