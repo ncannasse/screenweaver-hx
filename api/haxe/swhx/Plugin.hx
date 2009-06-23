@@ -90,7 +90,7 @@ class Plugin {
 			return;
 		try {
 			var url = Reflect.field(URLS,sysname);
-			var data = haxe.Http.request(url);
+			var data = haxe.Http.requestUrl(url);
 			var zip = neko.zip.Reader.readZip(new haxe.io.StringInput(data));
 			if( sysname == "Windows" ) {
 				for( file in zip ) {
